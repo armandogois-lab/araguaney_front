@@ -16,7 +16,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css}\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
     "types:generate": "tsx scripts/generate-types.ts",
     "predev": "tsx scripts/generate-types.ts || true",
     "prebuild": "tsx scripts/generate-types.ts"
