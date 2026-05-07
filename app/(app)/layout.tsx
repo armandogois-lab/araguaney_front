@@ -3,6 +3,6 @@ import { getCurrentUser } from '@/lib/auth/session';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
-  if (!user) redirect('/login');
+  if (!user) redirect('/auth/clear');
   return <>{children}</>;
 }

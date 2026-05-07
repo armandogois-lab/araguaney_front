@@ -46,14 +46,14 @@ describe('apiFetch', () => {
     expect((init.headers as Headers).get('authorization')).toBeNull();
   });
 
-  it('clears cookie and throws ApiError on 401', async () => {
+  it('throws ApiError on 401 without mutating cookies', async () => {
     mockReadCookie.mockResolvedValueOnce('expired-jwt');
     fetchMock.mockResolvedValueOnce(
       new Response(JSON.stringify({ message: 'Token expired' }), { status: 401 }),
     );
 
     await expect(apiFetch('/api/me', { method: 'GET' })).rejects.toBeInstanceOf(ApiError);
-    expect(mockClearCookie).toHaveBeenCalled();
+    expect(mockClearCookie).not.toHaveBeenCalled();
   });
 
   it('throws ApiError on non-OK without clearing cookie', async () => {
