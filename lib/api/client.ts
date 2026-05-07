@@ -1,5 +1,5 @@
 import 'server-only';
-import { readSessionCookie, clearSessionCookie } from '@/lib/auth/cookie';
+import { readSessionCookie } from '@/lib/auth/cookie';
 import { getEnv } from '@/lib/env';
 
 export class ApiError extends Error {
@@ -23,10 +23,6 @@ export async function apiFetch<T = unknown>(path: string, init?: RequestInit): P
   if (token) headers.set('authorization', `Bearer ${token}`);
 
   const res = await fetch(`${NEXT_PUBLIC_API_URL}${path}`, { ...init, headers });
-
-  if (res.status === 401) {
-    await clearSessionCookie();
-  }
 
   const text = await res.text();
   const body: unknown = text ? safeJson(text) : null;
