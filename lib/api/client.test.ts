@@ -11,7 +11,7 @@ vi.mock('@/lib/auth/cookie', () => ({
 
 vi.mock('@/lib/env', () => ({
   getEnv: () => ({
-    NEXT_PUBLIC_API_URL: 'http://test.local/api',
+    NEXT_PUBLIC_API_URL: 'http://test.local',
     NEXT_PUBLIC_SUPABASE_URL: 'https://x.supabase.co',
     NEXT_PUBLIC_SUPABASE_ANON_KEY: 'k',
   }),
@@ -32,7 +32,7 @@ describe('apiFetch', () => {
     await apiFetch('/api/me', { method: 'GET' });
 
     const [url, init] = fetchMock.mock.calls[0];
-    expect(url).toBe('http://test.local/api/api/me');
+    expect(url).toBe('http://test.local/api/me');
     expect((init.headers as Headers).get('authorization')).toBe('Bearer jwt-abc');
   });
 
