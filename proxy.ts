@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 const COOKIE_NAME = 'cfb_token';
 const PUBLIC_PATHS = ['/login'];
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const hasToken = request.cookies.has(COOKIE_NAME);
   const isPublic = PUBLIC_PATHS.includes(pathname);
