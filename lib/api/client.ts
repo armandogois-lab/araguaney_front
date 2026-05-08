@@ -15,7 +15,7 @@ export class ApiError extends Error {
 export async function apiFetch<T = unknown>(path: string, init?: RequestInit): Promise<T> {
   const { NEXT_PUBLIC_API_URL } = getEnv();
   const headers = new Headers(init?.headers);
-  if (!headers.has('content-type') && init?.body) {
+  if (!headers.has('content-type') && init?.body && !(init.body instanceof FormData)) {
     headers.set('content-type', 'application/json');
   }
 
