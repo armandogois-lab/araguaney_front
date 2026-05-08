@@ -1,18 +1,28 @@
-import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
+import { writeFileSync, mkdirSync, existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
-import openapiTS, { astToString } from 'openapi-typescript';
+import openapiTS, { astToString, type OpenAPI3 } from 'openapi-typescript';
 
 const SOURCE = process.env.OPENAPI_SOURCE ?? '../araguaney_back/openapi.json';
 const OUT = resolve(process.cwd(), 'types/openapi.d.ts');
 
 async function main() {
   const isUrl = SOURCE.startsWith('http://') || SOURCE.startsWith('https://');
-  const input = isUrl ? new URL(SOURCE) : resolve(process.cwd(), SOURCE);
-  if (!isUrl && !existsSync(input as string)) {
-    throw new Error(
-      `OpenAPI source not found at ${input}. Set OPENAPI_SOURCE env var or place the file.`,
-    );
+  let input: URL | OpenAPI3;
+
+  if (isUrl) {
+    input = new URL(SOURCE);
+  } else {
+    const filePath = resolve(process.cwd(), SOURCE);
+    if (!existsSync(filePath)) {
+      throw new Error(
+        `OpenAPI source not found at ${filePath}. Set OPENAPI_SOURCE env var or place the file.`,
+      );
+    }
+    // openapi-typescript v7 needs a URL or a parsed schema object — passing
+    // a filesystem string is rejected as "Unsupported schema format".
+    input = JSON.parse(readFileSync(filePath, 'utf8'));
   }
+
   const ast = await openapiTS(input);
   const ts = astToString(ast);
   mkdirSync(dirname(OUT), { recursive: true });
