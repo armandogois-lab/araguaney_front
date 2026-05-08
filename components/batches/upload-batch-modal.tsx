@@ -16,10 +16,10 @@ export function UploadBatchModal({ onClose }: { onClose: () => void }) {
 
   const mutation = useMutation({
     mutationFn: uploadBatch,
-    onSuccess: (batch) => {
+    onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['batches'] });
       toast.success(
-        `Lote ${batch.external_code} ingresado · ${batch.rows_imported.toLocaleString('en-US')} órdenes`,
+        `Lote ${result.code} ingresado · ${result.rows_imported.toLocaleString('en-US')} órdenes`,
       );
       onClose();
     },
