@@ -58,7 +58,7 @@ export function UploadBatchDropzone({ onPickFile, error }: Props) {
         <div className="mb-1 text-[14px] font-medium">
           Arrastra el archivo o haz click para seleccionarlo
         </div>
-        <div className="text-text-3 text-[12px]">Acepta .xlsx · hasta 10 MB</div>
+        <div className="text-text-3 text-[12px]">Acepta .xlsx · hasta 32 MB</div>
       </div>
 
       <UploadBatchRecent />

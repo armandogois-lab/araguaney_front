@@ -7,7 +7,7 @@ import { uploadBatch } from '@/lib/api/batches';
 import { UploadBatchDropzone } from './upload-batch-dropzone';
 import { UploadBatchUploading } from './upload-batch-uploading';
 
-const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_BYTES = 32 * 1024 * 1024;
 
 export function UploadBatchModal({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +34,7 @@ export function UploadBatchModal({ onClose }: { onClose: () => void }) {
 
   function pickFile(file: File) {
     if (!/\.xlsx$/i.test(file.name)) return setError('Formato no soportado. Solo .xlsx.');
-    if (file.size > MAX_BYTES) return setError('Archivo excede 10 MB.');
+    if (file.size > MAX_BYTES) return setError('Archivo excede 32 MB.');
     if (file.size === 0) return setError('Archivo vacío.');
     setError(null);
     setFilename(file.name);
