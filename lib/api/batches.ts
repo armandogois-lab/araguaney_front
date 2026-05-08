@@ -46,13 +46,26 @@ export async function listBatches(query: ListBatchesQuery = {}): Promise<BatchLi
  * straight through to the back — no rebuild, no `instanceof File` check
  * (in the Server Action runtime the File reference can be a different
  * realm's prototype, breaking instanceof).
+ *
+ * Returns the minimum the client needs to render the success toast.
+ * Returning the full BatchSummary triggered a Next.js RSC deserialization
+ * bug ("An unexpected response was received from the server") on Vercel
+ * even though the back's response was plain JSON. Stripping to a flat
+ * { code, rows_imported } sidesteps it; the table refresh comes from the
+ * cache invalidation in onSuccess.
  */
-export async function uploadBatch(formData: FormData): Promise<BatchSummary> {
+export async function uploadBatch(
+  formData: FormData,
+): Promise<{ code: string; rows_imported: number }> {
   if (!formData.has('file')) {
     throw new Error('Missing file in FormData');
   }
   try {
-    return await apiFetch<BatchSummary>('/api/batches', { method: 'POST', body: formData });
+    const batch = await apiFetch<BatchSummary>('/api/batches', {
+      method: 'POST',
+      body: formData,
+    });
+    return { code: batch.external_code, rows_imported: batch.rows_imported };
   } catch (err) {
     rethrowWithMessage(err);
   }
