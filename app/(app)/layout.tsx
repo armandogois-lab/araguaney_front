@@ -9,6 +9,12 @@ import { getCurrentUser } from '@/lib/auth/session';
 //    Static pages return 405 to POST, so this also unblocks /batches uploads.
 export const dynamic = 'force-dynamic';
 
+// Default Vercel timeout (60s) cut off the upload Server Action while the
+// back was still finishing the bulk ingestion of a real Cashea export
+// (~45k órdenes, ~62s). 300s = Vercel's per-function ceiling, leaves
+// generous headroom even for larger lotes.
+export const maxDuration = 300;
+
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
   if (!user) redirect('/auth/clear');
