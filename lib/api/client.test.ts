@@ -75,4 +75,17 @@ describe('apiFetch', () => {
     const result = await apiFetch<{ id: string; name: string }>('/api/me', { method: 'GET' });
     expect(result).toEqual({ id: '1', name: 'Test' });
   });
+
+  it('does not set content-type when body is FormData', async () => {
+    mockReadCookie.mockResolvedValueOnce('jwt');
+    fetchMock.mockResolvedValueOnce(new Response(JSON.stringify({ ok: true }), { status: 200 }));
+
+    const fd = new FormData();
+    fd.set('file', new Blob(['x'], { type: 'application/octet-stream' }), 'test.bin');
+
+    await apiFetch('/api/batches', { method: 'POST', body: fd });
+
+    const init = fetchMock.mock.calls[0][1] as RequestInit;
+    expect((init.headers as Headers).get('content-type')).toBeNull();
+  });
 });
