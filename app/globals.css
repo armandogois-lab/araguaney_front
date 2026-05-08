@@ -8,15 +8,15 @@
 /* Cashea CFB design tokens — extracted from Claude Design mockup */
 @theme {
   /* Surfaces */
-  --color-bg: #FAFAF7;
-  --color-card: #FEFEFE;
-  --color-hover: #F0EFEA;
-  --color-subtle: #FAFAF7;
+  --color-bg: #fafaf7;
+  --color-card: #fefefe;
+  --color-hover: #f0efea;
+  --color-subtle: #fafaf7;
 
   /* Text */
-  --color-text: #1A1A1A;
-  --color-text-2: #6B6B66;
-  --color-text-3: #8A8A85;
+  --color-text: #1a1a1a;
+  --color-text-2: #6b6b66;
+  --color-text-3: #8a8a85;
 
   /* Borders */
   --color-border-subtle: rgba(0, 0, 0, 0.08);
@@ -24,31 +24,31 @@
   --color-border-soft: rgba(0, 0, 0, 0.04);
 
   /* Sidebar (dark) */
-  --color-side: #0A0A0A;
+  --color-side: #0a0a0a;
   --color-side-text: rgba(254, 254, 254, 0.7);
   --color-side-active: rgba(254, 254, 254, 0.08);
   --color-side-hover: rgba(254, 254, 254, 0.05);
 
   /* Accent */
-  --color-yellow: #FDFA3D;
+  --color-yellow: #fdfa3d;
 
   /* Status pills (used in Slice 2+) */
-  --color-green-bg: #EAF3DE;
-  --color-green-text: #3B6D11;
+  --color-green-bg: #eaf3de;
+  --color-green-text: #3b6d11;
   --color-green-dot: #639922;
-  --color-green-deep: #27500A;
-  --color-warn-bg: #FAEEDA;
+  --color-green-deep: #27500a;
+  --color-warn-bg: #faeeda;
   --color-warn-text: #633806;
-  --color-warn-dot: #BA7517;
-  --color-warn-border: #EDB957;
-  --color-info-bg: #E8F1F7;
-  --color-info-text: #2B5572;
-  --color-neutral-bg: #F0EFEA;
-  --color-neutral-text: #6B6B66;
-  --color-sweep-bg: #F3F2EC;
-  --color-sweep-text: #5F5E5A;
+  --color-warn-dot: #ba7517;
+  --color-warn-border: #edb957;
+  --color-info-bg: #e8f1f7;
+  --color-info-text: #2b5572;
+  --color-neutral-bg: #f0efea;
+  --color-neutral-text: #6b6b66;
+  --color-sweep-bg: #f3f2ec;
+  --color-sweep-text: #5f5e5a;
   --color-sweep-dot: #888780;
-  --color-sweep-border: #B4B2A9;
+  --color-sweep-border: #b4b2a9;
 
   /* Type */
   --font-sans: 'Poppins', system-ui, sans-serif;
@@ -104,7 +104,7 @@
   --popover: var(--color-card);
   --popover-foreground: var(--color-text);
   --primary: var(--color-side);
-  --primary-foreground: #FEFEFE;
+  --primary-foreground: #fefefe;
   --secondary: var(--color-card);
   --secondary-foreground: var(--color-text);
   --muted: var(--color-hover);
@@ -126,7 +126,7 @@
   --sidebar-primary: var(--color-yellow);
   --sidebar-primary-foreground: var(--color-side);
   --sidebar-accent: var(--color-side-active);
-  --sidebar-accent-foreground: #FEFEFE;
+  --sidebar-accent-foreground: #fefefe;
   --sidebar-border: rgba(254, 254, 254, 0.08);
   --sidebar-ring: var(--color-yellow);
 }
