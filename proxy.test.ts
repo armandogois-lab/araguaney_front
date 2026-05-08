@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { middleware } from './middleware';
+import { proxy } from './proxy';
 import { NextRequest } from 'next/server';
 
 function req(url: string, cookies: Record<string, string> = {}) {
@@ -8,26 +8,26 @@ function req(url: string, cookies: Record<string, string> = {}) {
   return r;
 }
 
-describe('middleware', () => {
+describe('proxy', () => {
   it('redirects to /login when no cookie and accessing protected path', () => {
-    const res = middleware(req('http://localhost/'));
+    const res = proxy(req('http://localhost/'));
     expect(res?.status).toBe(307);
     expect(res?.headers.get('location')).toContain('/login');
   });
 
   it('redirects to / when cookie present and accessing /login', () => {
-    const res = middleware(req('http://localhost/login', { cfb_token: 'abc' }));
+    const res = proxy(req('http://localhost/login', { cfb_token: 'abc' }));
     expect(res?.status).toBe(307);
     expect(res?.headers.get('location')).toBe('http://localhost/');
   });
 
   it('allows /login when no cookie', () => {
-    const res = middleware(req('http://localhost/login'));
+    const res = proxy(req('http://localhost/login'));
     expect(res?.headers.get('location')).toBeNull();
   });
 
   it('allows / when cookie present', () => {
-    const res = middleware(req('http://localhost/', { cfb_token: 'abc' }));
+    const res = proxy(req('http://localhost/', { cfb_token: 'abc' }));
     expect(res?.headers.get('location')).toBeNull();
   });
 });
