@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { uploadBatch } from '@/lib/api/batches';
-import { ApiError } from '@/lib/api/error';
 import { UploadBatchDropzone } from './upload-batch-dropzone';
 import { UploadBatchUploading } from './upload-batch-uploading';
 
@@ -25,12 +24,11 @@ export function UploadBatchModal({ onClose }: { onClose: () => void }) {
       onClose();
     },
     onError: (err) => {
-      if (err instanceof ApiError) {
-        const body = err.body as { message?: string } | null;
-        setError(body?.message ?? 'No se pudo subir el lote');
-      } else {
-        setError('Error de red. Intenta de nuevo.');
-      }
+      // Server Actions don't preserve custom Error subclasses across the RPC
+      // boundary — the back's ApiError gets translated to a plain Error in
+      // lib/api/batches.ts:rethrowWithMessage and the message lands here.
+      const message = err instanceof Error ? err.message : 'No se pudo subir el lote';
+      setError(message || 'No se pudo subir el lote');
     },
   });
 
