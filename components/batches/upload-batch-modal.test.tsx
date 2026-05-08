@@ -38,12 +38,12 @@ describe('<UploadBatchModal />', () => {
     expect(mockUploadBatch).not.toHaveBeenCalled();
   });
 
-  it('rejects a >10MB xlsx with inline error', () => {
+  it('rejects a >32MB xlsx with inline error', () => {
     renderWithQuery(<UploadBatchModal onClose={vi.fn()} />);
     const dropzone = screen.getByTestId('dropzone');
-    const big = new File([new Blob([new Uint8Array(11 * 1024 * 1024)])], 'big.xlsx');
+    const big = new File([new Blob([new Uint8Array(33 * 1024 * 1024)])], 'big.xlsx');
     fireEvent.drop(dropzone, { dataTransfer: { files: [big] } });
-    expect(screen.getByText(/excede 10 mb/i)).toBeInTheDocument();
+    expect(screen.getByText(/excede 32 mb/i)).toBeInTheDocument();
     expect(mockUploadBatch).not.toHaveBeenCalled();
   });
 
