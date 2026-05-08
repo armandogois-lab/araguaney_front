@@ -4,23 +4,11 @@ import userEvent from '@testing-library/user-event';
 import { renderWithQuery } from '@/test/helpers/tanstack';
 import { UploadBatchModal } from './upload-batch-modal';
 
-const { mockUploadBatch, mockListBatches, toastSuccess, FakeApiError } = vi.hoisted(() => {
-  class FakeApiError extends Error {
-    constructor(
-      public status: number,
-      public body: unknown,
-    ) {
-      super();
-      this.name = 'ApiError';
-    }
-  }
-  return {
-    mockUploadBatch: vi.fn(),
-    mockListBatches: vi.fn().mockResolvedValue({ data: [], total: 0, limit: 3, offset: 0 }),
-    toastSuccess: vi.fn(),
-    FakeApiError,
-  };
-});
+const { mockUploadBatch, mockListBatches, toastSuccess } = vi.hoisted(() => ({
+  mockUploadBatch: vi.fn(),
+  mockListBatches: vi.fn().mockResolvedValue({ data: [], total: 0, limit: 3, offset: 0 }),
+  toastSuccess: vi.fn(),
+}));
 
 vi.mock('@/lib/api/batches', () => ({
   uploadBatch: (...a: unknown[]) => mockUploadBatch(...a),
@@ -29,10 +17,6 @@ vi.mock('@/lib/api/batches', () => ({
 
 vi.mock('sonner', () => ({
   toast: { success: (...a: unknown[]) => toastSuccess(...a) },
-}));
-
-vi.mock('@/lib/api/error', () => ({
-  ApiError: FakeApiError,
 }));
 
 describe('<UploadBatchModal />', () => {
@@ -88,8 +72,11 @@ describe('<UploadBatchModal />', () => {
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1));
   });
 
-  it('shows the back error message on 4xx', async () => {
-    mockUploadBatch.mockRejectedValueOnce(new FakeApiError(400, { message: 'Excel mal formado' }));
+  it('shows the error message thrown by the Server Action', async () => {
+    // The Server Action (lib/api/batches.ts) catches ApiError internally
+    // and rethrows as a plain Error with the back's message. The mutation
+    // sees the plain Error and we surface its message verbatim.
+    mockUploadBatch.mockRejectedValueOnce(new Error('Excel mal formado'));
     renderWithQuery(<UploadBatchModal onClose={vi.fn()} />);
     const dropzone = screen.getByTestId('dropzone');
     const file = new File([new Blob([new Uint8Array(100)])], 'lote.xlsx');
@@ -97,13 +84,13 @@ describe('<UploadBatchModal />', () => {
     await waitFor(() => expect(screen.getByText('Excel mal formado')).toBeInTheDocument());
   });
 
-  it('shows generic error when network error (no ApiError)', async () => {
-    mockUploadBatch.mockRejectedValueOnce(new Error('Network down'));
+  it('shows fallback message when error has no message', async () => {
+    mockUploadBatch.mockRejectedValueOnce(new Error(''));
     renderWithQuery(<UploadBatchModal onClose={vi.fn()} />);
     const dropzone = screen.getByTestId('dropzone');
     const file = new File([new Blob([new Uint8Array(100)])], 'lote.xlsx');
     fireEvent.drop(dropzone, { dataTransfer: { files: [file] } });
-    await waitFor(() => expect(screen.getByText(/error de red/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/no se pudo subir el lote/i)).toBeInTheDocument());
   });
 
   it('clicking the backdrop calls onClose', async () => {
