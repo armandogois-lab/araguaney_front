@@ -40,7 +40,9 @@ describe('uploadBatch', () => {
     const file = new File(['content'], 'test.xlsx', {
       type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
     });
-    await uploadBatch({ file });
+    const fd = new FormData();
+    fd.set('file', file);
+    await uploadBatch(fd);
 
     const [path, init] = mockApiFetch.mock.calls[0];
     expect(path).toBe('/api/batches');
@@ -53,9 +55,18 @@ describe('uploadBatch', () => {
   it('includes external_code when provided', async () => {
     mockApiFetch.mockResolvedValueOnce({ id: 'b-1' });
     const file = new File(['x'], 'a.xlsx');
-    await uploadBatch({ file, externalCode: 'BATCH-001' });
+    const fd = new FormData();
+    fd.set('file', file);
+    fd.set('external_code', 'BATCH-001');
+    await uploadBatch(fd);
 
     const init = mockApiFetch.mock.calls[0][1] as RequestInit;
     expect((init.body as FormData).get('external_code')).toBe('BATCH-001');
+  });
+
+  it('throws when no file is in FormData', async () => {
+    const fd = new FormData();
+    fd.set('external_code', 'BATCH-001');
+    await expect(uploadBatch(fd)).rejects.toThrow(/Missing file/i);
   });
 });

@@ -31,8 +31,7 @@ vi.mock('sonner', () => ({
   toast: { success: (...a: unknown[]) => toastSuccess(...a) },
 }));
 
-vi.mock('@/lib/api/client', () => ({
-  apiFetch: vi.fn(),
+vi.mock('@/lib/api/error', () => ({
   ApiError: FakeApiError,
 }));
 

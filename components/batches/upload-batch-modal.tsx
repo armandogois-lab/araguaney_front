@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { uploadBatch } from '@/lib/api/batches';
-import { ApiError } from '@/lib/api/client';
+import { ApiError } from '@/lib/api/error';
 import { UploadBatchDropzone } from './upload-batch-dropzone';
 import { UploadBatchUploading } from './upload-batch-uploading';
 
@@ -40,7 +40,9 @@ export function UploadBatchModal({ onClose }: { onClose: () => void }) {
     if (file.size === 0) return setError('Archivo vacío.');
     setError(null);
     setFilename(file.name);
-    mutation.mutate({ file });
+    const fd = new FormData();
+    fd.set('file', file);
+    mutation.mutate(fd);
   }
 
   const stage = mutation.status === 'pending' ? 'pending' : 'idle';

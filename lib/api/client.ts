@@ -1,16 +1,9 @@
 import 'server-only';
 import { readSessionCookie } from '@/lib/auth/cookie';
 import { getEnv } from '@/lib/env';
+import { ApiError } from './error';
 
-export class ApiError extends Error {
-  constructor(
-    public readonly status: number,
-    public readonly body: unknown,
-  ) {
-    super(`API error ${status}`);
-    this.name = 'ApiError';
-  }
-}
+export { ApiError };
 
 export async function apiFetch<T = unknown>(path: string, init?: RequestInit): Promise<T> {
   const { NEXT_PUBLIC_API_URL } = getEnv();
