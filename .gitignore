@@ -42,3 +42,6 @@ next-env.d.ts
 
 # Generated OpenAPI types
 /types/openapi.d.ts
+
+# Design references (not code; large HTML mockups)
+design/
