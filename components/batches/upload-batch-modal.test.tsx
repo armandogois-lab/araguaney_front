@@ -10,8 +10,11 @@ const { mockUploadBatch, mockListBatches, toastSuccess } = vi.hoisted(() => ({
   toastSuccess: vi.fn(),
 }));
 
+vi.mock('@/lib/api/upload-batch-file', () => ({
+  uploadBatchFile: (...a: unknown[]) => mockUploadBatch(...a),
+}));
+
 vi.mock('@/lib/api/batches', () => ({
-  uploadBatch: (...a: unknown[]) => mockUploadBatch(...a),
   listBatches: (...a: unknown[]) => mockListBatches(...a),
 }));
 
