@@ -40,30 +40,38 @@ export async function listBatches(query: ListBatchesQuery = {}): Promise<BatchLi
 }
 
 /**
- * Server Action consumed by the upload mutation. Takes raw FormData (the
- * native Server-Action-friendly serializable type). The client builds the
- * FormData with `file` (and optionally `external_code`) and we pass it
- * straight through to the back — no rebuild, no `instanceof File` check
- * (in the Server Action runtime the File reference can be a different
- * realm's prototype, breaking instanceof).
- *
- * Returns the minimum the client needs to render the success toast.
- * Returning the full BatchSummary triggered a Next.js RSC deserialization
- * bug ("An unexpected response was received from the server") on Vercel
- * even though the back's response was plain JSON. Stripping to a flat
- * { code, rows_imported } sidesteps it; the table refresh comes from the
- * cache invalidation in onSuccess.
+ * Step 1 of the direct-to-Storage upload flow. Vercel rejects Server Action
+ * bodies > 4.5 MB at the platform edge, so we can't push the file through a
+ * Server Action. Instead the back hands us a signed URL the browser can PUT
+ * directly to Supabase Storage; the response is ~200 bytes either way.
  */
-export async function uploadBatch(
-  formData: FormData,
-): Promise<{ code: string; rows_imported: number }> {
-  if (!formData.has('file')) {
-    throw new Error('Missing file in FormData');
-  }
+export async function getUploadSlot(): Promise<{
+  storage_path: string;
+  signed_upload_url: string;
+  signed_upload_token: string;
+}> {
   try {
-    const batch = await apiFetch<BatchSummary>('/api/batches', {
+    return await apiFetch('/api/batches/upload-url', { method: 'POST' });
+  } catch (err) {
+    rethrowWithMessage(err);
+  }
+}
+
+/**
+ * Step 2 of the direct-to-Storage upload flow. After the browser put the
+ * file into Storage at `storage_path`, the back fetches it back, hashes it,
+ * runs dedup + parse + ingest (same pipeline as the legacy multipart path)
+ * and returns the BatchSummary. We strip to { code, rows_imported } here for
+ * the same RSC deserialization reason as before.
+ */
+export async function processUploadedFile(input: {
+  storage_path: string;
+  filename: string;
+}): Promise<{ code: string; rows_imported: number }> {
+  try {
+    const batch = await apiFetch<BatchSummary>('/api/batches/from-storage', {
       method: 'POST',
-      body: formData,
+      body: JSON.stringify(input),
     });
     return { code: batch.external_code, rows_imported: batch.rows_imported };
   } catch (err) {

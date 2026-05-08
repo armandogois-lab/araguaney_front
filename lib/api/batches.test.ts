@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { listBatches, uploadBatch } from './batches';
+import { getUploadSlot, listBatches, processUploadedFile } from './batches';
 
 const mockApiFetch = vi.fn();
 vi.mock('./client', () => ({
@@ -32,41 +32,35 @@ describe('listBatches', () => {
   });
 });
 
-describe('uploadBatch', () => {
+describe('getUploadSlot', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('POSTs FormData with the file to /api/batches', async () => {
-    mockApiFetch.mockResolvedValueOnce({ id: 'b-1' });
-    const file = new File(['content'], 'test.xlsx', {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  it('POSTs /api/batches/upload-url and returns the slot', async () => {
+    mockApiFetch.mockResolvedValueOnce({
+      storage_path: 'abc.xlsx',
+      signed_upload_url: 'https://s.example/x',
+      signed_upload_token: 't0k',
     });
-    const fd = new FormData();
-    fd.set('file', file);
-    await uploadBatch(fd);
+    const slot = await getUploadSlot();
+    expect(mockApiFetch).toHaveBeenCalledWith('/api/batches/upload-url', { method: 'POST' });
+    expect(slot.storage_path).toBe('abc.xlsx');
+    expect(slot.signed_upload_token).toBe('t0k');
+  });
+});
 
+describe('processUploadedFile', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('POSTs /api/batches/from-storage with the slot id and filename', async () => {
+    mockApiFetch.mockResolvedValueOnce({ external_code: 'B-1', rows_imported: 10 });
+    const result = await processUploadedFile({ storage_path: 'abc.xlsx', filename: 'lote.xlsx' });
+    expect(result).toEqual({ code: 'B-1', rows_imported: 10 });
     const [path, init] = mockApiFetch.mock.calls[0];
-    expect(path).toBe('/api/batches');
+    expect(path).toBe('/api/batches/from-storage');
     expect(init.method).toBe('POST');
-    expect(init.body).toBeInstanceOf(FormData);
-    expect((init.body as FormData).get('file')).toBe(file);
-    expect((init.body as FormData).get('external_code')).toBeNull();
-  });
-
-  it('includes external_code when provided', async () => {
-    mockApiFetch.mockResolvedValueOnce({ id: 'b-1' });
-    const file = new File(['x'], 'a.xlsx');
-    const fd = new FormData();
-    fd.set('file', file);
-    fd.set('external_code', 'BATCH-001');
-    await uploadBatch(fd);
-
-    const init = mockApiFetch.mock.calls[0][1] as RequestInit;
-    expect((init.body as FormData).get('external_code')).toBe('BATCH-001');
-  });
-
-  it('throws when no file is in FormData', async () => {
-    const fd = new FormData();
-    fd.set('external_code', 'BATCH-001');
-    await expect(uploadBatch(fd)).rejects.toThrow(/Missing file/i);
+    expect(JSON.parse(init.body as string)).toEqual({
+      storage_path: 'abc.xlsx',
+      filename: 'lote.xlsx',
+    });
   });
 });
