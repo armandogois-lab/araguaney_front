@@ -10,6 +10,7 @@ const OPERATOR_PERMS = [
   'investor.read',
   'investor.write',
   'certificate.read',
+  'certificate.simulate',
   'certificate.create',
   'certificate.cancel',
   'audit.read',

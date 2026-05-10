@@ -2,6 +2,7 @@
 
 import { apiFetch } from './client';
 import { ApiError } from './error';
+import type { Certificate, CertificateTermDays, SimulationResult } from '@/lib/types/certificate';
 
 interface CertificatesListResponse {
   data: unknown[];
@@ -37,6 +38,43 @@ export async function countCertificatesIssued(
       method: 'GET',
     });
     return { total: res.total };
+  } catch (err) {
+    rethrowWithMessage(err);
+  }
+}
+
+export interface SimulateCertificateBody {
+  investor_id: string;
+  capital: number;
+  rate: number;
+  term_days: CertificateTermDays;
+  issue_date: string;
+}
+
+export interface IssueCertificateBody extends SimulateCertificateBody {
+  order_ids: string[];
+  expected_payload_hash: string;
+}
+
+export async function simulateCertificate(
+  body: SimulateCertificateBody,
+): Promise<SimulationResult> {
+  try {
+    return await apiFetch<SimulationResult>('/api/certificates/simulate', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    rethrowWithMessage(err);
+  }
+}
+
+export async function issueCertificate(body: IssueCertificateBody): Promise<Certificate> {
+  try {
+    return await apiFetch<Certificate>('/api/certificates', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
   } catch (err) {
     rethrowWithMessage(err);
   }
