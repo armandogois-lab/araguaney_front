@@ -1,7 +1,17 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { renderWithQuery } from '@/test/helpers/tanstack';
+import { UserProvider } from '@/lib/auth/user-context';
+import type { MeUser } from '@/lib/api/me';
 import { StockPage } from './stock-page';
+
+const mockOperator: MeUser = {
+  id: 'u-1',
+  email: 'op@x.com',
+  full_name: 'Op',
+  role: 'operator',
+  is_active: true,
+};
 
 const { mockListOrders, mockGetStats, mockCountCerts, mockListMerchants } = vi.hoisted(() => ({
   mockListOrders: vi.fn(),
@@ -42,7 +52,11 @@ describe('<StockPage />', () => {
   });
 
   it('renders header, banner, filters and table', async () => {
-    renderWithQuery(<StockPage />);
+    renderWithQuery(
+      <UserProvider user={mockOperator}>
+        <StockPage />
+      </UserProvider>,
+    );
     expect(
       screen.getByRole('heading', { level: 1, name: /stock de [oó]rdenes/i }),
     ).toBeInTheDocument();
@@ -54,7 +68,11 @@ describe('<StockPage />', () => {
   });
 
   it('re-keys the orders query when status filter changes', async () => {
-    renderWithQuery(<StockPage />);
+    renderWithQuery(
+      <UserProvider user={mockOperator}>
+        <StockPage />
+      </UserProvider>,
+    );
     await waitFor(() => expect(mockListOrders).toHaveBeenCalledTimes(1));
     expect(mockListOrders.mock.calls[0][0].status).toBe('available');
 
