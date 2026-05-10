@@ -34,6 +34,13 @@ describe('<Pill />', () => {
     expect(container.querySelector('span.bg-sweep-bg')).not.toBeNull();
   });
 
+  it('renders the danger variant with rose colors', () => {
+    const { container } = render(<Pill variant="danger">Defaulteada</Pill>);
+    const span = container.querySelector('span');
+    expect(span?.className).toContain('bg-rose-100');
+    expect(span?.className).toContain('text-rose-700');
+  });
+
   it('defaults to neutral when no variant is provided', () => {
     const { container } = render(<Pill>x</Pill>);
     expect(container.querySelector('span.bg-neutral-bg')).not.toBeNull();

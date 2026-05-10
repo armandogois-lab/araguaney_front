@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 
-export type PillVariant = 'success' | 'warn' | 'info' | 'neutral' | 'sweep';
+export type PillVariant = 'success' | 'warn' | 'info' | 'neutral' | 'sweep' | 'danger';
 
 interface Props {
   variant?: PillVariant;
@@ -14,6 +14,7 @@ const VARIANT_CLASSES: Record<PillVariant, string> = {
   info: 'bg-info-bg text-info-text',
   neutral: 'bg-neutral-bg text-neutral-text',
   sweep: 'bg-sweep-bg text-sweep-text border border-dashed border-sweep-border',
+  danger: 'bg-rose-100 text-rose-700',
 };
 
 const DOT_CLASSES: Record<PillVariant, string> = {
@@ -22,6 +23,7 @@ const DOT_CLASSES: Record<PillVariant, string> = {
   info: 'bg-info-text',
   neutral: 'bg-text-3',
   sweep: 'bg-sweep-dot',
+  danger: 'bg-rose-500',
 };
 
 export function Pill({ variant = 'neutral', children, className }: Props) {
