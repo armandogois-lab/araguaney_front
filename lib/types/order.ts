@@ -22,12 +22,12 @@ export interface OrderSummary {
   id: string;
   external_order_id: string;
   status: OrderStatus;
-  purchase_date: string;        // ISO date "YYYY-MM-DD"
+  purchase_date: string; // ISO date "YYYY-MM-DD"
   max_due_date: string;
-  total_amount: string;          // Decimal as string
+  total_amount: string; // Decimal as string
   installments_sum: string;
   num_installments: number;
-  imported_at: string;           // ISO timestamp
+  imported_at: string; // ISO timestamp
   merchant: OrderMerchantRef;
   end_user: OrderEndUserRef;
   batch: OrderBatchRef;
