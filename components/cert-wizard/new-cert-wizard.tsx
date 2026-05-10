@@ -22,7 +22,7 @@ export function NewCertWizard({ onClose }: Props) {
     <div
       data-testid="cert-wizard-backdrop"
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/45 p-12"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/45 p-6"
     >
       <div
         onClick={(e) => e.stopPropagation()}

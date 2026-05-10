@@ -12,7 +12,7 @@ export function SimStatCards({ simulation }: Props) {
       ? `${simulation.total_eligible_merchants} elegibles`
       : 'distintos RIF';
   return (
-    <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+    <div className="grid grid-cols-2 gap-2">
       <Card
         label="Comercios"
         value={String(simulation.total_distinct_merchants)}
