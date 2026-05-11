@@ -80,7 +80,10 @@ describe('<Step3Confirm />', () => {
   });
 
   it('triggerConfirm=true posts /certificates with order_ids and payload_hash', async () => {
-    mockIssue.mockResolvedValueOnce({ id: 'c-1', code: 'C0001A' });
+    mockIssue.mockResolvedValueOnce({
+      id: 'c-1',
+      certificate_code: 'C0001A',
+    } as unknown as import('@/lib/types/certificate').Certificate);
     const onSuccess = vi.fn();
     renderWithQuery(
       <Step3Confirm
@@ -98,7 +101,11 @@ describe('<Step3Confirm />', () => {
       order_ids: ['o-1', 'o-2'],
       expected_payload_hash: 'hash-abc',
     });
-    await waitFor(() => expect(onSuccess).toHaveBeenCalledWith({ id: 'c-1', code: 'C0001A' }));
+    await waitFor(() =>
+      expect(onSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'c-1', certificate_code: 'C0001A' }),
+      ),
+    );
     expect(toastSuccess).toHaveBeenCalledWith(expect.stringContaining('C0001A'));
   });
 

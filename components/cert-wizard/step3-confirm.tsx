@@ -35,7 +35,7 @@ export function Step3Confirm({
       qc.invalidateQueries({ queryKey: ['orders'] });
       qc.invalidateQueries({ queryKey: ['orders-stats'] });
       qc.invalidateQueries({ queryKey: ['certs-this-week'] });
-      toast.success(`Certificado ${cert.code} emitido`);
+      toast.success(`Certificado ${cert.certificate_code} emitido`);
       onSuccess(cert);
       onConfirmEnd();
     },

@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { countCertificatesIssued, simulateCertificate, issueCertificate } from './certificates';
+import {
+  countCertificatesIssued,
+  simulateCertificate,
+  issueCertificate,
+  listCertificates,
+  getCertificateDetail,
+  cancelCertificate,
+} from './certificates';
 
 const mockApiFetch = vi.fn();
 vi.mock('./client', () => ({
@@ -132,5 +139,64 @@ describe('issueCertificate', () => {
     const body = JSON.parse(init.body as string);
     expect(body.order_ids).toEqual(['o-1', 'o-2']);
     expect(body.expected_payload_hash).toBe('abc123');
+  });
+});
+
+describe('listCertificates', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('GETs /api/certificates with no params', async () => {
+    mockApiFetch.mockResolvedValueOnce({ data: [], total: 0, limit: 50, offset: 0 });
+    await listCertificates({});
+    expect(mockApiFetch).toHaveBeenCalledWith('/api/certificates', { method: 'GET' });
+  });
+
+  it('appends every supported filter', async () => {
+    mockApiFetch.mockResolvedValueOnce({ data: [], total: 0, limit: 50, offset: 0 });
+    await listCertificates({
+      limit: 50,
+      offset: 0,
+      status: 'issued',
+      investor_id: 'inv-1',
+      issue_date_from: '2026-05-01',
+      issue_date_to: '2026-05-31',
+      q: 'C4572',
+      sort: 'issue_date_desc',
+    });
+    const path = mockApiFetch.mock.calls[0][0] as string;
+    expect(path).toContain('status=issued');
+    expect(path).toContain('investor_id=inv-1');
+    expect(path).toContain('issue_date_from=2026-05-01');
+    expect(path).toContain('issue_date_to=2026-05-31');
+    expect(path).toContain('q=C4572');
+    expect(path).toContain('sort=issue_date_desc');
+  });
+});
+
+describe('getCertificateDetail', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('GETs /api/certificates/{id}', async () => {
+    mockApiFetch.mockResolvedValueOnce({ id: 'c-1', certificate_code: 'C0001A' });
+    await getCertificateDetail('c-1');
+    expect(mockApiFetch).toHaveBeenCalledWith('/api/certificates/c-1', { method: 'GET' });
+  });
+});
+
+describe('cancelCertificate', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('POSTs reason as JSON body to /api/certificates/{id}/cancel', async () => {
+    mockApiFetch.mockResolvedValueOnce({
+      id: 'c-1',
+      certificate_code: 'C0001A',
+      status: 'cancelled',
+    });
+    const result = await cancelCertificate('c-1', 'Cliente solicitó baja');
+    expect(result.status).toBe('cancelled');
+    const [path, init] = mockApiFetch.mock.calls[0];
+    expect(path).toBe('/api/certificates/c-1/cancel');
+    expect(init.method).toBe('POST');
+    expect(JSON.parse(init.body as string)).toEqual({ reason: 'Cliente solicitó baja' });
   });
 });

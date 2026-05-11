@@ -2,14 +2,13 @@
 
 import { apiFetch } from './client';
 import { ApiError } from './error';
-import type { Certificate, CertificateTermDays, SimulationResult } from '@/lib/types/certificate';
-
-interface CertificatesListResponse {
-  data: unknown[];
-  total: number;
-  limit: number;
-  offset: number;
-}
+import type {
+  CertificateDetail,
+  CertificateStatus,
+  CertificateTermDays,
+  CertificatesListResponse,
+  SimulationResult,
+} from '@/lib/types/certificate';
 
 function rethrowWithMessage(err: unknown): never {
   if (err instanceof ApiError) {
@@ -146,11 +145,63 @@ export async function simulateCertificate(
   }
 }
 
-export async function issueCertificate(body: IssueCertificateBody): Promise<Certificate> {
+export async function issueCertificate(body: IssueCertificateBody): Promise<CertificateDetail> {
   try {
-    return await apiFetch<Certificate>('/api/certificates', {
+    return await apiFetch<CertificateDetail>('/api/certificates', {
       method: 'POST',
       body: JSON.stringify(body),
+    });
+  } catch (err) {
+    rethrowWithMessage(err);
+  }
+}
+
+export interface ListCertificatesQuery {
+  limit?: number;
+  offset?: number;
+  status?: CertificateStatus;
+  investor_id?: string;
+  issue_date_from?: string;
+  issue_date_to?: string;
+  q?: string;
+  sort?: 'issue_date_desc' | 'issue_date_asc' | 'code_asc';
+}
+
+export async function listCertificates(
+  query: ListCertificatesQuery,
+): Promise<CertificatesListResponse> {
+  const params = new URLSearchParams();
+  if (query.limit !== undefined) params.set('limit', String(query.limit));
+  if (query.offset !== undefined) params.set('offset', String(query.offset));
+  if (query.status) params.set('status', query.status);
+  if (query.investor_id) params.set('investor_id', query.investor_id);
+  if (query.issue_date_from) params.set('issue_date_from', query.issue_date_from);
+  if (query.issue_date_to) params.set('issue_date_to', query.issue_date_to);
+  if (query.q) params.set('q', query.q);
+  if (query.sort) params.set('sort', query.sort);
+  const qs = params.toString();
+  try {
+    return await apiFetch<CertificatesListResponse>(`/api/certificates${qs ? '?' + qs : ''}`, {
+      method: 'GET',
+    });
+  } catch (err) {
+    rethrowWithMessage(err);
+  }
+}
+
+export async function getCertificateDetail(id: string): Promise<CertificateDetail> {
+  try {
+    return await apiFetch<CertificateDetail>(`/api/certificates/${id}`, { method: 'GET' });
+  } catch (err) {
+    rethrowWithMessage(err);
+  }
+}
+
+export async function cancelCertificate(id: string, reason: string): Promise<CertificateDetail> {
+  try {
+    return await apiFetch<CertificateDetail>(`/api/certificates/${id}/cancel`, {
+      method: 'POST',
+      body: JSON.stringify({ reason }),
     });
   } catch (err) {
     rethrowWithMessage(err);
