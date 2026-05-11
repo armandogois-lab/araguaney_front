@@ -1,5 +1,11 @@
 import { fmtDate } from '@/lib/format/date';
-import type { CertificateDetail, CertificateEvent } from '@/lib/types/certificate';
+import { fmtMoney2 } from '@/lib/format/money';
+import { fmtPct } from '@/lib/format/percent';
+import type {
+  CertificateDetail,
+  CertificateEvent,
+  CertificateOrder,
+} from '@/lib/types/certificate';
 
 interface Props {
   cert: CertificateDetail;
@@ -7,13 +13,33 @@ interface Props {
 
 const EVENT_LIMIT = 10;
 
+function firstMaturity(orders: CertificateOrder[]): string | null {
+  if (orders.length === 0) return null;
+  return orders.reduce(
+    (acc, o) => (o.max_due_date < acc ? o.max_due_date : acc),
+    orders[0].max_due_date,
+  );
+}
+
 export function CertAuditSidebar({ cert }: Props) {
   const events = cert.events.slice(0, EVENT_LIMIT);
+  const fm = firstMaturity(cert.orders);
   return (
     <div className="flex flex-col gap-6">
       <Block title="INVERSOR">
         <KV k="Razón social" v={cert.investor.legal_name} />
         <KV k="RIF" v={cert.investor.rif} mono last />
+      </Block>
+
+      <Block title="DETALLE FINANCIERO">
+        <KV k="Precio" v={cert.price} />
+        <KV k="Nominal objetivo" v={fmtMoney2(Number(cert.nominal_target))} />
+        <KV k="Nominal real" v={fmtMoney2(Number(cert.nominal_actual))} />
+        <KV k="Pagado por inversor" v={fmtMoney2(Number(cert.investor_paid))} />
+        <KV k="Residual" v={fmtMoney2(Number(cert.investor_returned))} />
+        <KV k="Rendimiento" v={fmtMoney2(Number(cert.investor_yield))} />
+        <KV k="Shortfall" v={fmtPct(cert.shortfall_pct, 4)} />
+        <KV k="Primer vencimiento" v={fm ? fmtDate(fm) : '—'} last />
       </Block>
 
       <Block title="REGLAS VERIFICADAS">

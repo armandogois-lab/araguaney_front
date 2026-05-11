@@ -74,4 +74,28 @@ describe('<CertAuditSidebar />', () => {
     render(<CertAuditSidebar cert={mockCert({ events: [] })} />);
     expect(screen.getByText(/sin eventos/i)).toBeInTheDocument();
   });
+
+  it('renders DETALLE FINANCIERO block with all financial fields', () => {
+    render(<CertAuditSidebar cert={mockCert()} />);
+    expect(screen.getByText('DETALLE FINANCIERO')).toBeInTheDocument();
+    expect(screen.getByText('Precio')).toBeInTheDocument();
+    expect(screen.getByText('Nominal objetivo')).toBeInTheDocument();
+    expect(screen.getByText('Nominal real')).toBeInTheDocument();
+    expect(screen.getByText('Pagado por inversor')).toBeInTheDocument();
+    expect(screen.getByText('Residual')).toBeInTheDocument();
+    expect(screen.getByText('Rendimiento')).toBeInTheDocument();
+    expect(screen.getByText('Shortfall')).toBeInTheDocument();
+    expect(screen.getByText('Primer vencimiento')).toBeInTheDocument();
+    // sample value formatting
+    expect(screen.getByText('0.984833')).toBeInTheDocument();
+    expect(screen.getByText('$101,540.60')).toBeInTheDocument();
+  });
+
+  it('shows "—" for primer vencimiento when pool is empty', () => {
+    render(<CertAuditSidebar cert={mockCert({ orders: [] })} />);
+    expect(screen.getByText('Primer vencimiento')).toBeInTheDocument();
+    // The "—" appears next to the "Primer vencimiento" label
+    const primerVtoRow = screen.getByText('Primer vencimiento').parentElement!;
+    expect(primerVtoRow.textContent).toContain('—');
+  });
 });
