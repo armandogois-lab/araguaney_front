@@ -35,4 +35,16 @@ describe('hasPermission', () => {
   it('returns false for unknown permissions', () => {
     expect(hasPermission('admin', 'nonexistent.perm')).toBe(false);
   });
+
+  describe('certificate.cancel', () => {
+    it('operator has it', () => {
+      expect(hasPermission('operator', 'certificate.cancel')).toBe(true);
+    });
+    it('admin has it', () => {
+      expect(hasPermission('admin', 'certificate.cancel')).toBe(true);
+    });
+    it('auditor does NOT have it', () => {
+      expect(hasPermission('auditor', 'certificate.cancel')).toBe(false);
+    });
+  });
 });
