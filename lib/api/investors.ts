@@ -2,7 +2,12 @@
 
 import { apiFetch } from './client';
 import { ApiError } from './error';
-import type { InvestorCreate, InvestorSummary, InvestorsListResponse } from '@/lib/types/investor';
+import type {
+  InvestorCreate,
+  InvestorSummary,
+  InvestorsListResponse,
+  InvestorUpdate,
+} from '@/lib/types/investor';
 
 function rethrowWithMessage(err: unknown): never {
   if (err instanceof ApiError) {
@@ -45,6 +50,17 @@ export async function createInvestor(body: InvestorCreate): Promise<InvestorSumm
   try {
     return await apiFetch<InvestorSummary>('/api/investors', {
       method: 'POST',
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    rethrowWithMessage(err);
+  }
+}
+
+export async function updateInvestor(id: string, body: InvestorUpdate): Promise<InvestorSummary> {
+  try {
+    return await apiFetch<InvestorSummary>(`/api/investors/${id}`, {
+      method: 'PATCH',
       body: JSON.stringify(body),
     });
   } catch (err) {

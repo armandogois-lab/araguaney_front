@@ -47,4 +47,35 @@ describe('hasPermission', () => {
       expect(hasPermission('auditor', 'certificate.cancel')).toBe(false);
     });
   });
+
+  describe('investor.create', () => {
+    it('operator has it', () => {
+      expect(hasPermission('operator', 'investor.create')).toBe(true);
+    });
+    it('admin has it', () => {
+      expect(hasPermission('admin', 'investor.create')).toBe(true);
+    });
+    it('auditor does NOT have it', () => {
+      expect(hasPermission('auditor', 'investor.create')).toBe(false);
+    });
+  });
+
+  describe('investor.update', () => {
+    it('operator has it', () => {
+      expect(hasPermission('operator', 'investor.update')).toBe(true);
+    });
+    it('admin has it', () => {
+      expect(hasPermission('admin', 'investor.update')).toBe(true);
+    });
+    it('auditor does NOT have it', () => {
+      expect(hasPermission('auditor', 'investor.update')).toBe(false);
+    });
+  });
+
+  describe('investor.write (legacy)', () => {
+    it('is no longer recognized', () => {
+      expect(hasPermission('operator', 'investor.write')).toBe(false);
+      expect(hasPermission('admin', 'investor.write')).toBe(false);
+    });
+  });
 });
