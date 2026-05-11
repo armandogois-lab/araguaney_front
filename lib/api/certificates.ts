@@ -2,14 +2,12 @@
 
 import { apiFetch } from './client';
 import { ApiError } from './error';
-import type { Certificate, CertificateTermDays, SimulationResult } from '@/lib/types/certificate';
-
-interface CertificatesListResponse {
-  data: unknown[];
-  total: number;
-  limit: number;
-  offset: number;
-}
+import type {
+  Certificate,
+  CertificateTermDays,
+  CertificatesListResponse,
+  SimulationResult,
+} from '@/lib/types/certificate';
 
 function rethrowWithMessage(err: unknown): never {
   if (err instanceof ApiError) {
