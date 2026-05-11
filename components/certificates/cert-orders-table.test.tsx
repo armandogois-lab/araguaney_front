@@ -62,4 +62,84 @@ describe('<CertOrdersTable />', () => {
     expect(screen.getByText('GRUPO CANALETTO')).toBeInTheDocument();
     expect(screen.queryByText('CENTRAL MADEIRENSE')).not.toBeInTheDocument();
   });
+
+  it('paginates 100 orders to 2 pages of 50', () => {
+    const many: CertificateOrder[] = Array.from({ length: 100 }, (_, i) => ({
+      id: `o-${i}`,
+      external_order_id: String(10_000_000 + i),
+      merchant: { id: `m-${i}`, current_name: `Comercio ${i}`, rif: `J-${i}` },
+      purchase_date: '2026-03-18',
+      max_due_date: '2026-04-03',
+      installments_sum_snapshot: '50.0000',
+      assigned_at: '2026-04-27T14:30:00Z',
+      installments: [
+        { installment_number: 1, amount: '50.00', due_date: '2026-04-03', status: 'pending' },
+      ],
+    }));
+    render(<CertOrdersTable orders={many} />);
+    expect(screen.getByText(/mostrando 1[–-]50 de 100/i)).toBeInTheDocument();
+    // first page shows orders 0..49
+    expect(screen.getByText('10000000')).toBeInTheDocument();
+    expect(screen.queryByText('10000050')).not.toBeInTheDocument();
+  });
+
+  it('prev/next buttons navigate pages', () => {
+    const many: CertificateOrder[] = Array.from({ length: 60 }, (_, i) => ({
+      id: `o-${i}`,
+      external_order_id: String(20_000_000 + i),
+      merchant: { id: `m-${i}`, current_name: `C ${i}`, rif: `J-${i}` },
+      purchase_date: '2026-03-18',
+      max_due_date: '2026-04-03',
+      installments_sum_snapshot: '10.0000',
+      assigned_at: '2026-04-27T14:30:00Z',
+      installments: [],
+    }));
+    render(<CertOrdersTable orders={many} />);
+    expect(screen.getByLabelText(/p[aá]gina anterior/i)).toBeDisabled();
+    fireEvent.click(screen.getByLabelText(/p[aá]gina siguiente/i));
+    expect(screen.getByText(/mostrando 51[–-]60 de 60/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/p[aá]gina siguiente/i)).toBeDisabled();
+    expect(screen.getByText('20000050')).toBeInTheDocument();
+  });
+
+  it('pool total is calculated over the filtered set (not just current page)', () => {
+    const many: CertificateOrder[] = Array.from({ length: 60 }, (_, i) => ({
+      id: `o-${i}`,
+      external_order_id: String(30_000_000 + i),
+      merchant: { id: `m-${i}`, current_name: `C ${i}`, rif: `J-${i}` },
+      purchase_date: '2026-03-18',
+      max_due_date: '2026-04-03',
+      installments_sum_snapshot: '100.0000',
+      assigned_at: '2026-04-27T14:30:00Z',
+      installments: [
+        { installment_number: 1, amount: '100.00', due_date: '2026-04-03', status: 'pending' },
+      ],
+    }));
+    render(<CertOrdersTable orders={many} />);
+    // Page 1 shows 50 rows but total reflects 60 orders × $100 = $6,000
+    expect(
+      screen.getByText(/total del pool.*\$6,000\.00.*60 [oó]rdenes.*60 cuotas/i),
+    ).toBeInTheDocument();
+  });
+
+  it('changing the filter resets page to 0', () => {
+    const many: CertificateOrder[] = Array.from({ length: 60 }, (_, i) => ({
+      id: `o-${i}`,
+      external_order_id: String(40_000_000 + i),
+      merchant: { id: `m-${i}`, current_name: i < 5 ? 'CANALETTO' : `Otro ${i}`, rif: `J-${i}` },
+      purchase_date: '2026-03-18',
+      max_due_date: '2026-04-03',
+      installments_sum_snapshot: '10.0000',
+      assigned_at: '2026-04-27T14:30:00Z',
+      installments: [],
+    }));
+    render(<CertOrdersTable orders={many} />);
+    fireEvent.click(screen.getByLabelText(/p[aá]gina siguiente/i));
+    expect(screen.getByText(/mostrando 51[–-]60 de 60/i)).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText(/id o comercio/i), {
+      target: { value: 'canaletto' },
+    });
+    // 5 matches, all visible on page 0
+    expect(screen.getByText(/mostrando 1[–-]5 de 5/i)).toBeInTheDocument();
+  });
 });
