@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { listInvestors, createInvestor } from './investors';
+import { listInvestors, createInvestor, updateInvestor } from './investors';
 
 const mockApiFetch = vi.fn();
 vi.mock('./client', () => ({
@@ -53,6 +53,40 @@ describe('createInvestor', () => {
       legal_name: 'Alpha',
       rif: 'J-1',
       kind: 'juridica',
+    });
+  });
+});
+
+describe('updateInvestor', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('PATCHes /api/investors/{id} with JSON body', async () => {
+    mockApiFetch.mockResolvedValueOnce({
+      id: 'inv-1',
+      legal_name: 'Inversora Alpha, C.A.',
+      rif: 'J-12345678-9',
+      kind: 'juridica',
+      status: 'active',
+      email: 'ops@alpha.com',
+      phone: null,
+      notes: null,
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-05-11T10:00:00Z',
+      updated_by: null,
+      active_cert_count: 2,
+      total_invested: '450000.0000',
+    });
+    const result = await updateInvestor('inv-1', {
+      email: 'ops@alpha.com',
+      status: 'active',
+    });
+    expect(result.email).toBe('ops@alpha.com');
+    const [path, init] = mockApiFetch.mock.calls[0];
+    expect(path).toBe('/api/investors/inv-1');
+    expect(init.method).toBe('PATCH');
+    expect(JSON.parse(init.body as string)).toEqual({
+      email: 'ops@alpha.com',
+      status: 'active',
     });
   });
 });
