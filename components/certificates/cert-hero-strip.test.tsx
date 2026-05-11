@@ -88,4 +88,55 @@ describe('<CertHeroStrip />', () => {
     );
     expect(screen.getByText(/cancelado.*01\/05\/2026/i)).toBeInTheDocument();
   });
+
+  it('renders PRIMER VTO card with the earliest order due date and its code', () => {
+    render(
+      <CertHeroStrip
+        cert={mockCert({
+          orders: [
+            {
+              id: 'o-1',
+              external_order_id: '99999999',
+              merchant: { id: 'm-1', current_name: 'A', rif: 'J-1' },
+              purchase_date: '2026-04-01',
+              max_due_date: '2026-05-15',
+              installments_sum_snapshot: '100.00',
+              assigned_at: '2026-04-27T14:30:00Z',
+              installments: [],
+            },
+            {
+              id: 'o-2',
+              external_order_id: '85657474',
+              merchant: { id: 'm-2', current_name: 'B', rif: 'J-2' },
+              purchase_date: '2026-04-01',
+              max_due_date: '2026-05-03',
+              installments_sum_snapshot: '50.00',
+              assigned_at: '2026-04-27T14:30:00Z',
+              installments: [],
+            },
+          ],
+        })}
+      />,
+    );
+    expect(screen.getByText('PRIMER VTO')).toBeInTheDocument();
+    expect(screen.getByText('03/05/2026')).toBeInTheDocument();
+    expect(screen.getByText('orden #85657474')).toBeInTheDocument();
+  });
+
+  it('shows dash and "sin órdenes" when pool is empty', () => {
+    render(<CertHeroStrip cert={mockCert({ orders: [] })} />);
+    expect(screen.getByText('PRIMER VTO')).toBeInTheDocument();
+    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.getByText('sin órdenes')).toBeInTheDocument();
+  });
+
+  it('keeps the original 5 cards visible alongside PRIMER VTO', () => {
+    render(<CertHeroStrip cert={mockCert()} />);
+    expect(screen.getByText('CAPITAL')).toBeInTheDocument();
+    expect(screen.getByText('TASA')).toBeInTheDocument();
+    expect(screen.getByText('PLAZO')).toBeInTheDocument();
+    expect(screen.getByText('COMPOSICIÓN')).toBeInTheDocument();
+    expect(screen.getByText('ESTADO')).toBeInTheDocument();
+    expect(screen.getByText('PRIMER VTO')).toBeInTheDocument();
+  });
 });
