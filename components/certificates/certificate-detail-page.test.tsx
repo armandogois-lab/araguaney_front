@@ -5,7 +5,11 @@ import { CertificateDetailPage } from './certificate-detail-page';
 import { UserProvider } from '@/lib/auth/user-context';
 import type { CertificateDetail } from '@/lib/types/certificate';
 
-const { mockGet } = vi.hoisted(() => ({ mockGet: vi.fn() }));
+const { mockGet, mockGenerate, mockSaveAs } = vi.hoisted(() => ({
+  mockGet: vi.fn(),
+  mockGenerate: vi.fn(),
+  mockSaveAs: vi.fn(),
+}));
 
 vi.mock('@/lib/api/certificates', () => ({
   getCertificateDetail: (...a: unknown[]) => mockGet(...a),
@@ -14,6 +18,14 @@ vi.mock('@/lib/api/certificates', () => ({
 
 vi.mock('sonner', () => ({
   toast: { success: vi.fn(), error: vi.fn() },
+}));
+
+vi.mock('@/lib/export/certificate-excel', () => ({
+  generateCertificateExcel: (...a: unknown[]) => mockGenerate(...a),
+}));
+
+vi.mock('file-saver', () => ({
+  saveAs: (...a: unknown[]) => mockSaveAs(...a),
 }));
 
 function mockCert(over: Partial<CertificateDetail> = {}): CertificateDetail {
@@ -59,7 +71,10 @@ function wrap(ui: React.ReactElement) {
 }
 
 describe('<CertificateDetailPage />', () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGenerate.mockResolvedValue(new Blob(['fake-xlsx'], { type: 'application/octet-stream' }));
+  });
 
   it('shows loading state initially', () => {
     mockGet.mockImplementation(() => new Promise(() => {}));
@@ -97,5 +112,18 @@ describe('<CertificateDetailPage />', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: /cancelar certificado/i }));
     expect(screen.getByText(/cancelar certificado c4572a/i)).toBeInTheDocument();
+  });
+
+  it('clicking Exportar Excel triggers the helper + saveAs', async () => {
+    mockGet.mockResolvedValueOnce(mockCert());
+    wrap(<CertificateDetailPage id="c-1" />);
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /exportar excel/i })).toBeInTheDocument(),
+    );
+    fireEvent.click(screen.getByRole('button', { name: /exportar excel/i }));
+    await waitFor(() => expect(mockGenerate).toHaveBeenCalled());
+    await waitFor(() => expect(mockSaveAs).toHaveBeenCalled());
+    const filename = mockSaveAs.mock.calls[0][1] as string;
+    expect(filename).toMatch(/Certificado_C4572A.*\.xlsx/);
   });
 });
