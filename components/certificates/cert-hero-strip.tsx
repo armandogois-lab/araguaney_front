@@ -2,10 +2,15 @@ import { fmtMoney2 } from '@/lib/format/money';
 import { fmtPct } from '@/lib/format/percent';
 import { fmtDate } from '@/lib/format/date';
 import { daysSince } from '@/lib/format/cycle-day';
-import type { CertificateDetail } from '@/lib/types/certificate';
+import type { CertificateDetail, CertificateOrder } from '@/lib/types/certificate';
 
 interface Props {
   cert: CertificateDetail;
+}
+
+function firstMaturityOrder(orders: CertificateOrder[]): CertificateOrder | null {
+  if (orders.length === 0) return null;
+  return orders.reduce((acc, o) => (o.max_due_date < acc.max_due_date ? o : acc), orders[0]);
 }
 
 export function CertHeroStrip({ cert }: Props) {
@@ -13,6 +18,7 @@ export function CertHeroStrip({ cert }: Props) {
   const yieldFormatted = `${fmtMoney2(Number(cert.investor_yield))} al vencimiento`;
   const residualSub = `residual ${fmtMoney2(Number(cert.investor_returned))}`;
   const day = daysSince(cert.issue_date);
+  const firstMat = firstMaturityOrder(cert.orders);
 
   let statusLabel = '';
   let statusSub = '';
@@ -32,7 +38,7 @@ export function CertHeroStrip({ cert }: Props) {
   }
 
   return (
-    <div className="bg-card border-border-subtle grid grid-cols-2 gap-4 rounded-xl border p-5 md:grid-cols-5">
+    <div className="bg-card border-border-subtle grid grid-cols-2 gap-4 rounded-xl border p-5 md:grid-cols-3 lg:grid-cols-6">
       <Card label="CAPITAL" value={fmtMoney2(Number(cert.investor_capital))} sub={residualSub} />
       <Card label="TASA" value={fmtPct(cert.annual_rate)} sub={yieldFormatted} />
       <Card
@@ -46,6 +52,11 @@ export function CertHeroStrip({ cert }: Props) {
         sub={`órdenes · ${merchantCount} comercios`}
       />
       <Card label="ESTADO" value={statusLabel} sub={statusSub} />
+      <Card
+        label="PRIMER VTO"
+        value={firstMat ? fmtDate(firstMat.max_due_date) : '—'}
+        sub={firstMat ? `orden #${firstMat.external_order_id}` : 'sin órdenes'}
+      />
     </div>
   );
 }

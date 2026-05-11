@@ -10,9 +10,11 @@ import { CertificateStatusPill } from './certificate-status-pill';
 interface Props {
   cert: CertificateDetail;
   onCancel: () => void;
+  onExport?: () => void;
+  exporting?: boolean;
 }
 
-export function CertHeader({ cert, onCancel }: Props) {
+export function CertHeader({ cert, onCancel, onExport, exporting = false }: Props) {
   const user = useUser();
   const canCancel = hasPermission(user.role, 'certificate.cancel') && cert.status === 'issued';
 
@@ -44,15 +46,27 @@ export function CertHeader({ cert, onCancel }: Props) {
             <span className="font-mono">{cert.investor.rif}</span>
           </div>
         </div>
-        {canCancel && (
-          <button
-            type="button"
-            onClick={onCancel}
-            className="border-border-subtle bg-card text-text-2 hover:bg-subtle rounded-md border px-4 py-2 text-[12px] font-medium"
-          >
-            Cancelar certificado
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {onExport && (
+            <button
+              type="button"
+              onClick={onExport}
+              disabled={exporting}
+              className="border-border-subtle bg-card text-text-2 hover:bg-subtle rounded-md border px-4 py-2 text-[12px] font-medium disabled:opacity-40"
+            >
+              {exporting ? 'Generando…' : 'Exportar Excel'}
+            </button>
+          )}
+          {canCancel && (
+            <button
+              type="button"
+              onClick={onCancel}
+              className="border-border-subtle bg-card text-text-2 hover:bg-subtle rounded-md border px-4 py-2 text-[12px] font-medium"
+            >
+              Cancelar certificado
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

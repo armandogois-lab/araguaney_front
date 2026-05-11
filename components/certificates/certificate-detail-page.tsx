@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { getCertificateDetail } from '@/lib/api/certificates';
 import { CertHeader } from './cert-header';
 import { CertHeroStrip } from './cert-hero-strip';
@@ -16,11 +17,31 @@ interface Props {
 
 export function CertificateDetailPage({ id }: Props) {
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const { data, isLoading, isError } = useQuery({
     queryKey: ['certificate', id],
     queryFn: () => getCertificateDetail(id),
     staleTime: 30 * 1000,
   });
+
+  async function handleExport() {
+    if (!data || exporting) return;
+    setExporting(true);
+    try {
+      const [{ generateCertificateExcel }, { saveAs }] = await Promise.all([
+        import('@/lib/export/certificate-excel'),
+        import('file-saver'),
+      ]);
+      const blob = await generateCertificateExcel(data);
+      const filename = `Certificado_${data.certificate_code}_${data.issue_date}.xlsx`;
+      saveAs(blob, filename);
+      toast.success('Excel exportado');
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'No se pudo generar el archivo');
+    } finally {
+      setExporting(false);
+    }
+  }
 
   if (isLoading) {
     return (
@@ -48,7 +69,12 @@ export function CertificateDetailPage({ id }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-[1440px] px-9 py-7">
-      <CertHeader cert={data} onCancel={() => setCancelOpen(true)} />
+      <CertHeader
+        cert={data}
+        onCancel={() => setCancelOpen(true)}
+        onExport={handleExport}
+        exporting={exporting}
+      />
       <div className="mt-5 flex flex-col gap-5">
         <CertHeroStrip cert={data} />
         <div className="grid grid-cols-1 gap-5 md:grid-cols-[1fr_320px]">

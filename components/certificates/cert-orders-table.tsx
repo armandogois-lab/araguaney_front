@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { fmtDate } from '@/lib/format/date';
 import { fmtMoney2 } from '@/lib/format/money';
 import type { CertificateOrder } from '@/lib/types/certificate';
@@ -9,8 +9,15 @@ interface Props {
   orders: CertificateOrder[];
 }
 
+const PAGE_SIZE = 50;
+
 export function CertOrdersTable({ orders }: Props) {
   const [q, setQ] = useState('');
+  // Store filter key alongside page so resets happen during render (no useEffect)
+  const [{ page, filterKey }, setPageState] = useState({ page: 0, filterKey: '' });
+
+  const currentFilterKey = `${q}|${orders.length}`;
+  const effectivePage = currentFilterKey !== filterKey ? 0 : page;
 
   const filtered = useMemo(() => {
     if (!q.trim()) return orders;
@@ -32,6 +39,15 @@ export function CertOrdersTable({ orders }: Props) {
 
   const totalAmount = filtered.reduce((acc, o) => acc + Number(o.installments_sum_snapshot), 0);
   const totalInstallments = filtered.reduce((acc, o) => acc + o.installments.length, 0);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(effectivePage, totalPages - 1);
+  const filterKeyForState = currentFilterKey;
+  const start = filtered.length === 0 ? 0 : safePage * PAGE_SIZE + 1;
+  const end = Math.min((safePage + 1) * PAGE_SIZE, filtered.length);
+  const paginated = filtered.slice(safePage * PAGE_SIZE, (safePage + 1) * PAGE_SIZE);
+  const hasPrev = safePage > 0;
+  const hasNext = safePage < totalPages - 1;
 
   return (
     <div className="bg-card border-border-subtle overflow-hidden rounded-xl border">
@@ -59,7 +75,7 @@ export function CertOrdersTable({ orders }: Props) {
           </tr>
         </thead>
         <tbody>
-          {filtered.map((o) => (
+          {paginated.map((o) => (
             <tr key={o.id} className="border-border-soft hover:bg-subtle border-b">
               <td className="text-text-2 px-4 py-3 font-mono text-[11.5px]">
                 {o.external_order_id}
@@ -77,11 +93,35 @@ export function CertOrdersTable({ orders }: Props) {
           ))}
         </tbody>
       </table>
-      <div className="bg-subtle border-border-subtle border-t px-4 py-3 text-[11.5px]">
-        <span className="font-medium">Total del pool: </span>
-        <span className="tabular-nums">
-          {fmtMoney2(totalAmount)} · {filtered.length} órdenes · {totalInstallments} cuotas
+      <div className="border-border-subtle flex items-center justify-between border-t px-4 py-3 text-[11.5px]">
+        <span className="text-text-3 tabular-nums">
+          Mostrando {start}–{end} de {filtered.length.toLocaleString('en-US')}
         </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            aria-label="Página anterior"
+            disabled={!hasPrev}
+            onClick={() =>
+              setPageState({ page: Math.max(0, safePage - 1), filterKey: filterKeyForState })
+            }
+            className="border-border-subtle rounded border px-2 py-1 text-[11px] disabled:opacity-40"
+          >
+            ←
+          </button>
+          <button
+            type="button"
+            aria-label="Página siguiente"
+            disabled={!hasNext}
+            onClick={() => setPageState({ page: safePage + 1, filterKey: filterKeyForState })}
+            className="border-border-subtle rounded border px-2 py-1 text-[11px] disabled:opacity-40"
+          >
+            →
+          </button>
+        </div>
+      </div>
+      <div className="bg-subtle border-border-subtle border-t px-4 py-3 text-[11.5px] tabular-nums">
+        {`Total del pool: ${fmtMoney2(totalAmount)} · ${filtered.length} órdenes · ${totalInstallments} cuotas`}
       </div>
     </div>
   );

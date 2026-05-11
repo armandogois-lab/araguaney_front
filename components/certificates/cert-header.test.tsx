@@ -94,4 +94,43 @@ describe('<CertHeader />', () => {
     fireEvent.click(screen.getByRole('button', { name: /cancelar certificado/i }));
     expect(onCancel).toHaveBeenCalled();
   });
+
+  it('renders "Exportar Excel" button when onExport prop is provided', () => {
+    render(
+      <UserProvider user={operator}>
+        <CertHeader cert={mockCert()} onCancel={vi.fn()} onExport={vi.fn()} />
+      </UserProvider>,
+    );
+    expect(screen.getByRole('button', { name: /exportar excel/i })).toBeInTheDocument();
+  });
+
+  it('Exportar button visible for auditor too', () => {
+    render(
+      <UserProvider user={auditor}>
+        <CertHeader cert={mockCert()} onCancel={vi.fn()} onExport={vi.fn()} />
+      </UserProvider>,
+    );
+    expect(screen.getByRole('button', { name: /exportar excel/i })).toBeInTheDocument();
+  });
+
+  it('clicking Exportar fires onExport', () => {
+    const onExport = vi.fn();
+    render(
+      <UserProvider user={operator}>
+        <CertHeader cert={mockCert()} onCancel={vi.fn()} onExport={onExport} />
+      </UserProvider>,
+    );
+    fireEvent.click(screen.getByRole('button', { name: /exportar excel/i }));
+    expect(onExport).toHaveBeenCalled();
+  });
+
+  it('button shows "Generando…" and is disabled while exporting=true', () => {
+    render(
+      <UserProvider user={operator}>
+        <CertHeader cert={mockCert()} onCancel={vi.fn()} onExport={vi.fn()} exporting />
+      </UserProvider>,
+    );
+    const btn = screen.getByRole('button', { name: /generando/i });
+    expect(btn).toBeDisabled();
+  });
 });
