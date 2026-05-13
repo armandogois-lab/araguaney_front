@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { fmtDate, fmtDateTime } from './date';
+import { fmtDate, fmtDateTime, fmtRelativeTime } from './date';
 
 describe('fmtDate', () => {
   it('formats ISO timestamps as DD/MM/YYYY', () => {
@@ -41,5 +41,33 @@ describe('fmtDateTime', () => {
     expect(fmtDateTime(undefined)).toBe('—');
     expect(fmtDateTime('')).toBe('—');
     expect(fmtDateTime('not-a-date')).toBe('—');
+  });
+});
+
+describe('fmtRelativeTime', () => {
+  const now = new Date('2026-05-13T14:00:00.000Z');
+
+  it('returns "ahora" within the first minute', () => {
+    expect(fmtRelativeTime('2026-05-13T13:59:50.000Z', now)).toBe('ahora');
+  });
+
+  it('returns "hace Nm" for minutes < 60', () => {
+    expect(fmtRelativeTime('2026-05-13T13:45:00.000Z', now)).toBe('hace 15m');
+  });
+
+  it('returns "hace Nh" for hours < 24', () => {
+    expect(fmtRelativeTime('2026-05-13T11:00:00.000Z', now)).toBe('hace 3h');
+  });
+
+  it('returns "ayer" for 1 day ago', () => {
+    expect(fmtRelativeTime('2026-05-12T14:00:00.000Z', now)).toBe('ayer');
+  });
+
+  it('returns "hace Nd" for 2..6 days ago', () => {
+    expect(fmtRelativeTime('2026-05-10T14:00:00.000Z', now)).toBe('hace 3d');
+  });
+
+  it('falls back to fmtDate for entries older than a week', () => {
+    expect(fmtRelativeTime('2026-04-01T14:00:00.000Z', now)).toBe('01/04/2026');
   });
 });
