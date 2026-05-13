@@ -26,7 +26,7 @@ export function NewCertWizard({ onClose }: Props) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className="bg-card w-full max-w-[880px] overflow-hidden rounded-xl"
+        className="bg-card w-full max-w-[1100px] overflow-hidden rounded-xl"
       >
         <header className="border-border-subtle flex items-start justify-between border-b px-7 py-5">
           <div>
