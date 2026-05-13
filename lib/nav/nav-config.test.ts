@@ -38,10 +38,13 @@ describe('NAV_SECTIONS', () => {
     expect(visible.find((v) => v.item === 'Usuarios')).toBeUndefined();
   });
 
-  it('operator sees 6 items across 2 sections (no Sistema)', () => {
+  it('operator sees 7 items (Sistema → Auditoría only)', () => {
     const visible = visibleItemsForRole('operator');
-    expect(visible).toHaveLength(6);
-    expect(visible.find((v) => v.section === 'Sistema')).toBeUndefined();
+    expect(visible).toHaveLength(7);
+    const sistemaItems = visible.filter((v) => v.section === 'Sistema').map((v) => v.item);
+    expect(sistemaItems).toEqual(['Auditoría']);
+    expect(visible.find((v) => v.item === 'Trazabilidad')).toBeUndefined();
+    expect(visible.find((v) => v.item === 'Usuarios')).toBeUndefined();
   });
 
   it('every item has a unique key', () => {

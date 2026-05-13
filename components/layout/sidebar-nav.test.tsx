@@ -35,12 +35,13 @@ describe('<SidebarNav />', () => {
     expect(screen.queryByText('Usuarios')).toBeNull();
   });
 
-  it('operator sees 6 items in 2 sections (no Sistema)', () => {
+  it('operator sees 7 items in 3 sections (Sistema → only Auditoría)', () => {
     render(<SidebarNav role="operator" />);
     expect(screen.getByText('Operación')).toBeInTheDocument();
     expect(screen.getByText('Datos')).toBeInTheDocument();
-    expect(screen.queryByText('Sistema')).toBeNull();
-    expect(screen.queryByText('Auditoría')).toBeNull();
+    expect(screen.getByText('Sistema')).toBeInTheDocument();
+    expect(screen.getByText('Auditoría')).toBeInTheDocument();
+    expect(screen.queryByText('Trazabilidad')).toBeNull();
     expect(screen.queryByText('Usuarios')).toBeNull();
   });
 });

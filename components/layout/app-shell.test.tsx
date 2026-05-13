@@ -29,12 +29,15 @@ describe('<AppShell />', () => {
     expect(screen.getByTestId('page')).toBeInTheDocument();
   });
 
-  it('hides Sistema for operator role', () => {
+  it('shows Sistema → Auditoría for operator (hides Trazabilidad and Usuarios)', () => {
     render(
       <AppShell user={{ ...adminUser, role: 'operator' }}>
         <div>X</div>
       </AppShell>,
     );
-    expect(screen.queryByText('Sistema')).toBeNull();
+    expect(screen.getByText('Sistema')).toBeInTheDocument();
+    expect(screen.getByText('Auditoría')).toBeInTheDocument();
+    expect(screen.queryByText('Trazabilidad')).toBeNull();
+    expect(screen.queryByText('Usuarios')).toBeNull();
   });
 });

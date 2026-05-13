@@ -40,10 +40,15 @@ export const NAV_SECTIONS: readonly NavSection[] = [
   },
   {
     title: 'Sistema',
-    allowedRoles: ['admin', 'auditor'],
+    allowedRoles: ALL_ROLES,
     items: [
       { key: 'audit', label: 'Auditoría', href: '/audit' },
-      { key: 'traceability', label: 'Trazabilidad', href: '/traceability' },
+      {
+        key: 'traceability',
+        label: 'Trazabilidad',
+        href: '/traceability',
+        allowedRoles: ['admin', 'auditor'],
+      },
       { key: 'users', label: 'Usuarios', href: '/users', allowedRoles: ['admin'] },
     ],
   },
