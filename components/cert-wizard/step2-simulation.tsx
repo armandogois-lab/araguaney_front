@@ -68,7 +68,7 @@ export function Step2Simulation({
         onParamsChange={onParamsChange}
         onChangeInvestor={onChangeInvestor}
       />
-      <div className="flex flex-col gap-3">
+      <div className="flex min-w-0 flex-col gap-3">
         {poolChangedWarning && (
           <div className="bg-warn-bg text-warn-text rounded-md px-3 py-2 text-[12px]">
             El pool cambió mientras revisabas. Recalculá para volver a emitir.
