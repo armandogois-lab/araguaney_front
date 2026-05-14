@@ -1,14 +1,5 @@
-import { ComingSoon } from '@/components/layout/coming-soon';
-import { PageHeader } from '@/components/layout/page-header';
+import { TraceabilityPage } from '@/components/traceability/traceability-page';
 
-export default function TraceabilityPage() {
-  return (
-    <div className="mx-auto w-full max-w-[1440px] px-9 py-7">
-      <PageHeader
-        breadcrumb={{ section: 'Sistema', current: 'Trazabilidad' }}
-        title="Trazabilidad"
-      />
-      <ComingSoon />
-    </div>
-  );
+export default function TraceabilityRoute() {
+  return <TraceabilityPage />;
 }
