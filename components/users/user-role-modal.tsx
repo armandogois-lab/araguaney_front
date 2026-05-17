@@ -57,9 +57,7 @@ export function UserRoleModal({ target, onClose }: Props) {
           </button>
         </header>
         <div className="flex flex-col gap-4 px-6 py-5">
-          <p className="text-text-2 text-[12px]">
-            {`Rol actual: ${ROLE_LABEL[target.role]}`}
-          </p>
+          <p className="text-text-2 text-[12px]">{`Rol actual: ${ROLE_LABEL[target.role]}`}</p>
           <label className="flex flex-col gap-1">
             <span className="text-text-3 text-[11px] uppercase tracking-wide">Nuevo rol</span>
             <select
