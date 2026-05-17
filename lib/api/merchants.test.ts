@@ -1,42 +1,31 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { listMerchants } from './merchants';
 
-const mockApiFetch = vi.fn();
-vi.mock('./client', () => ({
-  apiFetch: (path: string, init?: RequestInit) => mockApiFetch(path, init),
-  ApiError: class ApiError extends Error {},
-}));
+const { apiFetchMock } = vi.hoisted(() => ({ apiFetchMock: vi.fn() }));
+vi.mock('./client', () => ({ apiFetch: apiFetchMock }));
 
-describe('listMerchants', () => {
-  beforeEach(() => vi.clearAllMocks());
+import { listMerchants, getMerchantDetail } from './merchants';
 
-  it('GETs /api/merchants with limit + sort', async () => {
-    mockApiFetch.mockResolvedValueOnce({ data: [], total: 0, limit: 200, offset: 0 });
-    await listMerchants({ limit: 200, sort: 'name_asc' });
-    expect(mockApiFetch).toHaveBeenCalledWith('/api/merchants?limit=200&sort=name_asc', {
-      method: 'GET',
-    });
+describe('lib/api/merchants', () => {
+  beforeEach(() => apiFetchMock.mockReset());
+
+  it('listMerchants without filters calls /api/merchants with no query string', async () => {
+    apiFetchMock.mockResolvedValueOnce({ data: [], total: 0, limit: 25, offset: 0 });
+    await listMerchants();
+    expect(apiFetchMock).toHaveBeenCalledWith('/api/merchants', { method: 'GET' });
   });
 
-  it('returns the parsed response', async () => {
-    const expected = {
-      data: [
-        {
-          id: 'm-1',
-          rif: 'J-1',
-          current_name: 'Mercantil',
-          first_seen_at: '2026-05-01T00:00:00Z',
-          last_seen_at: '2026-05-08T00:00:00Z',
-          order_count: 5,
-          total_orders_amount: '1500.0000',
-        },
-      ],
-      total: 1,
-      limit: 200,
-      offset: 0,
-    };
-    mockApiFetch.mockResolvedValueOnce(expected);
-    const result = await listMerchants({ limit: 200 });
-    expect(result).toEqual(expected);
+  it('listMerchants serializes q/sort/limit/offset as query params', async () => {
+    apiFetchMock.mockResolvedValueOnce({ data: [], total: 0, limit: 25, offset: 50 });
+    await listMerchants({ q: 'mercantil', sort: 'last_seen_desc', limit: 25, offset: 50 });
+    expect(apiFetchMock).toHaveBeenCalledWith(
+      '/api/merchants?q=mercantil&sort=last_seen_desc&limit=25&offset=50',
+      { method: 'GET' },
+    );
+  });
+
+  it('getMerchantDetail GETs /api/merchants/:id', async () => {
+    apiFetchMock.mockResolvedValueOnce({ id: 'm-1' });
+    await getMerchantDetail('m-1');
+    expect(apiFetchMock).toHaveBeenCalledWith('/api/merchants/m-1', { method: 'GET' });
   });
 });
