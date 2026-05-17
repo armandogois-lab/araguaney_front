@@ -20,10 +20,7 @@ export function UserRow({ user, isSelf, onEditRole, onToggleActive }: Props) {
     (isSelf ? 'opacity-50 pointer-events-none' : 'hover:bg-subtle');
 
   return (
-    <div
-      className={containerClasses}
-      title={isSelf ? 'No podés editarte a vos mismo' : undefined}
-    >
+    <div className={containerClasses} title={isSelf ? 'No podés editarte a vos mismo' : undefined}>
       <div>
         <div className="text-[12.5px] font-medium">{user.full_name}</div>
         <div className="text-text-3 text-[11px]">{user.email}</div>

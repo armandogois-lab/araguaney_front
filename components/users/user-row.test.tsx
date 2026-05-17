@@ -18,14 +18,7 @@ function user(over: Partial<AppUser> = {}): AppUser {
 
 describe('<UserRow />', () => {
   it('renders email, full_name, role pill, last_login, created_at', () => {
-    render(
-      <UserRow
-        user={user()}
-        isSelf={false}
-        onEditRole={vi.fn()}
-        onToggleActive={vi.fn()}
-      />,
-    );
+    render(<UserRow user={user()} isSelf={false} onEditRole={vi.fn()} onToggleActive={vi.fn()} />);
     expect(screen.getByText('Ana Pérez')).toBeInTheDocument();
     expect(screen.getByText('ana@x.com')).toBeInTheDocument();
     expect(screen.getByText('Operador')).toBeInTheDocument();
@@ -67,7 +60,12 @@ describe('<UserRow />', () => {
     const onEditRole = vi.fn();
     const onToggleActive = vi.fn();
     render(
-      <UserRow user={user()} isSelf={true} onEditRole={onEditRole} onToggleActive={onToggleActive} />,
+      <UserRow
+        user={user()}
+        isSelf={true}
+        onEditRole={onEditRole}
+        onToggleActive={onToggleActive}
+      />,
     );
     fireEvent.click(screen.getByText('Operador'));
     fireEvent.click(screen.getByText(/activo/i));
