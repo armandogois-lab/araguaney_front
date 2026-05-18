@@ -1,9 +1,11 @@
 'use client';
 
-import type { UseQueryResult } from '@tanstack/react-query';
+import Link from 'next/link';
+import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { fmtMoney2 } from '@/lib/format/money';
 import type { OrdersStats } from '@/lib/types/order';
 import type { CertificatesListResponse } from '@/lib/types/certificate';
+import { listCertificates } from '@/lib/api/certificates';
 
 interface Props {
   statsQ: UseQueryResult<OrdersStats>;
@@ -11,11 +13,27 @@ interface Props {
 }
 
 export function CycleMetricsStrip({ statsQ, certsQ }: Props) {
+  const draftsCountQ = useQuery({
+    queryKey: ['certificates-drafts-count'],
+    queryFn: () => listCertificates({ status: 'draft', limit: 1 }).then((r) => r.total),
+    staleTime: 30_000,
+  });
+  const draftCount = draftsCountQ.data ?? 0;
+
   return (
-    <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+    <div className="grid grid-cols-1 gap-3 md:grid-cols-3 lg:grid-cols-4">
       <StockCard q={statsQ} />
       <AsignadoCard q={certsQ} />
       <InvestorsCard q={certsQ} />
+      <Link
+        href="/certificates?status=draft"
+        className="bg-warn-bg text-warn-text border-warn-border rounded-xl border px-4 py-3 hover:opacity-80"
+      >
+        <div className="text-[10px] uppercase tracking-wide">Borradores pendientes</div>
+        <div className="text-[18px] font-semibold tabular-nums">
+          {draftCount.toLocaleString('en-US')}
+        </div>
+      </Link>
     </div>
   );
 }

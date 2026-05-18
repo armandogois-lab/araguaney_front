@@ -1,9 +1,16 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { screen, waitFor } from '@testing-library/react';
 import type { UseQueryResult } from '@tanstack/react-query';
+import { renderWithQuery } from '@/test/helpers/tanstack';
 import { CycleMetricsStrip } from './cycle-metrics-strip';
 import type { OrdersStats } from '@/lib/types/order';
 import type { CertificatesListResponse, CertificateSummary } from '@/lib/types/certificate';
+
+const { mockListCertificates } = vi.hoisted(() => ({ mockListCertificates: vi.fn() }));
+
+vi.mock('@/lib/api/certificates', () => ({
+  listCertificates: (...a: unknown[]) => mockListCertificates(...a),
+}));
 
 function statsQ(data?: OrdersStats, override: Partial<UseQueryResult<OrdersStats>> = {}) {
   return {
@@ -51,7 +58,13 @@ function makeCert(over: Partial<CertificateSummary> = {}): CertificateSummary {
 }
 
 describe('<CycleMetricsStrip />', () => {
-  it('renders the 3 cards with computed values', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // default: no drafts
+    mockListCertificates.mockResolvedValue({ data: [], total: 0, limit: 1, offset: 0 });
+  });
+
+  it('renders the 3 cards with computed values', async () => {
     const stats: OrdersStats = {
       by_status: {
         available: {
@@ -88,7 +101,7 @@ describe('<CycleMetricsStrip />', () => {
       limit: 50,
       offset: 0,
     };
-    render(<CycleMetricsStrip statsQ={statsQ(stats)} certsQ={certsQ(certs)} />);
+    renderWithQuery(<CycleMetricsStrip statsQ={statsQ(stats)} certsQ={certsQ(certs)} />);
     expect(screen.getByText('Stock disponible')).toBeInTheDocument();
     expect(screen.getByText('$1,132,418.00')).toBeInTheDocument();
     expect(screen.getByText(/1,500 órdenes/)).toBeInTheDocument();
@@ -101,7 +114,7 @@ describe('<CycleMetricsStrip />', () => {
   });
 
   it('stats card shows error when statsQ.isError', () => {
-    render(
+    renderWithQuery(
       <CycleMetricsStrip
         statsQ={statsQ(undefined, { isError: true })}
         certsQ={certsQ(undefined, { isLoading: true })}
@@ -111,7 +124,7 @@ describe('<CycleMetricsStrip />', () => {
   });
 
   it('shows skeleton text while loading', () => {
-    render(
+    renderWithQuery(
       <CycleMetricsStrip
         statsQ={statsQ(undefined, { isLoading: true })}
         certsQ={certsQ(undefined, { isLoading: true })}
@@ -132,8 +145,48 @@ describe('<CycleMetricsStrip />', () => {
       available_capital: '0',
     };
     const empty: CertificatesListResponse = { data: [], total: 0, limit: 50, offset: 0 };
-    render(<CycleMetricsStrip statsQ={statsQ(stats)} certsQ={certsQ(empty)} />);
+    renderWithQuery(<CycleMetricsStrip statsQ={statsQ(stats)} certsQ={certsQ(empty)} />);
     expect(screen.getByText('$0.00')).toBeInTheDocument();
     expect(screen.getByText(/0 certificado/)).toBeInTheDocument();
+  });
+
+  it('renders "Borradores pendientes" pill with count from listCertificates', async () => {
+    mockListCertificates.mockResolvedValue({ data: [], total: 5, limit: 1, offset: 0 });
+    const empty: CertificatesListResponse = { data: [], total: 0, limit: 50, offset: 0 };
+    const stats: OrdersStats = {
+      by_status: {
+        available: { count: 0, total_amount: '0', total_installments_amount: '0' },
+        assigned: { count: 0, total_amount: '0', total_installments_amount: '0' },
+        matured: { count: 0, total_amount: '0', total_installments_amount: '0' },
+        defaulted: { count: 0, total_amount: '0', total_installments_amount: '0' },
+      },
+      total_orders: 0,
+      available_capital: '0',
+    };
+    renderWithQuery(<CycleMetricsStrip statsQ={statsQ(stats)} certsQ={certsQ(empty)} />);
+    expect(screen.getByText(/borradores pendientes/i)).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('5')).toBeInTheDocument());
+  });
+
+  it('shows 0 when there are no pending drafts', async () => {
+    mockListCertificates.mockResolvedValue({ data: [], total: 0, limit: 1, offset: 0 });
+    const empty: CertificatesListResponse = { data: [], total: 0, limit: 50, offset: 0 };
+    const stats: OrdersStats = {
+      by_status: {
+        available: { count: 0, total_amount: '0', total_installments_amount: '0' },
+        assigned: { count: 0, total_amount: '0', total_installments_amount: '0' },
+        matured: { count: 0, total_amount: '0', total_installments_amount: '0' },
+        defaulted: { count: 0, total_amount: '0', total_installments_amount: '0' },
+      },
+      total_orders: 0,
+      available_capital: '0',
+    };
+    renderWithQuery(<CycleMetricsStrip statsQ={statsQ(stats)} certsQ={certsQ(empty)} />);
+    expect(screen.getByText(/borradores pendientes/i)).toBeInTheDocument();
+    // "0" appears once from Inversores activos too, so check the pill specifically
+    await waitFor(() => {
+      const link = screen.getByRole('link', { name: /borradores pendientes/i });
+      expect(link).toHaveTextContent('0');
+    });
   });
 });

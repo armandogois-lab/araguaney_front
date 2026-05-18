@@ -5,9 +5,10 @@ interface Props {
   label: string;
   href: string;
   active: boolean;
+  badge?: number;
 }
 
-export function SidebarNavItem({ label, href, active }: Props) {
+export function SidebarNavItem({ label, href, active, badge }: Props) {
   return (
     <Link
       href={href}
@@ -21,6 +22,11 @@ export function SidebarNavItem({ label, href, active }: Props) {
       {active && <span className="bg-yellow absolute top-1.5 bottom-1.5 left-0 w-0.5 rounded-sm" />}
       <span className="h-[5px] w-[5px] shrink-0 rounded-full bg-white/40" />
       <span className="flex-1">{label}</span>
+      {badge !== undefined && badge > 0 && (
+        <span className="bg-warn-bg text-warn-text ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium tabular-nums">
+          {badge}
+        </span>
+      )}
     </Link>
   );
 }
