@@ -41,6 +41,7 @@ export async function getMerchantDetail(id: string): Promise<MerchantDetail> {
   try {
     return await apiFetch<MerchantDetail>(`/api/merchants/${id}`, { method: 'GET' });
   } catch (err) {
+    if (err instanceof ApiError && err.status === 404) throw err;
     rethrowWithMessage(err);
   }
 }
