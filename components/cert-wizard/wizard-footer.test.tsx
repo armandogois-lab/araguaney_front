@@ -57,7 +57,7 @@ describe('<WizardFooter />', () => {
     expect(screen.getByRole('button', { name: /recalcular/i })).toBeInTheDocument();
   });
 
-  it('Step 3: Confirmar emisión button calls onConfirm', () => {
+  it('Step 3: Confirmar borrador button calls onConfirm', () => {
     const onConfirm = vi.fn();
     render(
       <WizardFooter
@@ -70,7 +70,7 @@ describe('<WizardFooter />', () => {
         onConfirm={onConfirm}
       />,
     );
-    fireEvent.click(screen.getByRole('button', { name: /confirmar emisi[oó]n/i }));
+    fireEvent.click(screen.getByRole('button', { name: /confirmar borrador/i }));
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
@@ -87,6 +87,6 @@ describe('<WizardFooter />', () => {
         onConfirm={vi.fn()}
       />,
     );
-    expect(screen.getByRole('button', { name: /confirmar emisi[oó]n/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /confirmar borrador/i })).toBeDisabled();
   });
 });

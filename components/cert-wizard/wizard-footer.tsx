@@ -75,7 +75,7 @@ export function WizardFooter({
             ← Atrás
           </Btn>
           <Btn onClick={onConfirm} variant="primary" disabled={!canContinue || busy}>
-            Confirmar emisión{busy ? '…' : ''}
+            Confirmar borrador{busy ? '…' : ''}
           </Btn>
         </>
       )}

@@ -106,7 +106,7 @@ describe('<Step3Confirm />', () => {
         expect.objectContaining({ id: 'c-1', certificate_code: 'C0001A' }),
       ),
     );
-    expect(toastSuccess).toHaveBeenCalledWith(expect.stringContaining('C0001A'));
+    expect(toastSuccess).toHaveBeenCalledWith(expect.stringMatching(/borrador/i));
   });
 
   it('on 409 calls onPoolChanged + does NOT call onSuccess', async () => {

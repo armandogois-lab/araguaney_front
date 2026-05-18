@@ -1,7 +1,7 @@
 const STEPS: Array<{ n: 1 | 2 | 3; label: string }> = [
   { n: 1, label: 'Datos del inversor' },
   { n: 2, label: 'Simulación del pool' },
-  { n: 3, label: 'Emisión y firma' },
+  { n: 3, label: 'Confirmación del borrador' },
 ];
 
 function stateFor(stepN: 1 | 2 | 3, current: 1 | 2 | 3): 'done' | 'active' | 'pending' {
