@@ -21,9 +21,9 @@ interface Props {
 }
 
 const STATUS_OPTIONS: Array<{ value: CertificateStatusFilter; label: string }> = [
+  { value: 'all', label: 'Todos' },
   { value: 'issued', label: 'Activos' },
   { value: 'draft', label: 'Borradores' },
-  { value: 'all', label: 'Todos' },
   { value: 'matured', label: 'Vencidos' },
   { value: 'cancelled', label: 'Cancelados' },
 ];
