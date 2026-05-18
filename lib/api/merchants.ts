@@ -2,7 +2,7 @@
 
 import { apiFetch } from './client';
 import { ApiError } from './error';
-import type { MerchantsListResponse } from '@/lib/types/merchant';
+import type { MerchantDetail, MerchantsListResponse } from '@/lib/types/merchant';
 
 function rethrowWithMessage(err: unknown): never {
   if (err instanceof ApiError) {
@@ -13,24 +13,35 @@ function rethrowWithMessage(err: unknown): never {
 }
 
 export interface ListMerchantsQuery {
+  q?: string;
+  sort?: 'name_asc' | 'name_desc' | 'last_seen_desc';
   limit?: number;
   offset?: number;
-  sort?: 'name_asc' | 'name_desc' | 'orders_desc';
 }
 
 export async function listMerchants(
   query: ListMerchantsQuery = {},
 ): Promise<MerchantsListResponse> {
   const params = new URLSearchParams();
+  if (query.q) params.set('q', query.q);
+  if (query.sort) params.set('sort', query.sort);
   if (query.limit !== undefined) params.set('limit', String(query.limit));
   if (query.offset !== undefined) params.set('offset', String(query.offset));
-  if (query.sort) params.set('sort', query.sort);
   const qs = params.toString();
   try {
     return await apiFetch<MerchantsListResponse>(`/api/merchants${qs ? '?' + qs : ''}`, {
       method: 'GET',
     });
   } catch (err) {
+    rethrowWithMessage(err);
+  }
+}
+
+export async function getMerchantDetail(id: string): Promise<MerchantDetail> {
+  try {
+    return await apiFetch<MerchantDetail>(`/api/merchants/${id}`, { method: 'GET' });
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) throw err;
     rethrowWithMessage(err);
   }
 }
