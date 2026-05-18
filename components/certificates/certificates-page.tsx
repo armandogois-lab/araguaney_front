@@ -1,20 +1,42 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { PageHeader } from '@/components/layout/page-header';
-import { CertificateFilters, type CertificateFiltersValue } from './certificate-filters';
+import {
+  CertificateFilters,
+  type CertificateFiltersValue,
+  type CertificateStatusFilter,
+} from './certificate-filters';
 import { CertificatesTable } from './certificates-table';
 
-const INITIAL_FILTERS: CertificateFiltersValue = {
-  status: 'issued',
-  investorId: null,
-  issueDateFrom: null,
-  issueDateTo: null,
-  q: '',
-};
+const VALID_STATUSES: CertificateStatusFilter[] = [
+  'issued',
+  'draft',
+  'all',
+  'matured',
+  'cancelled',
+];
+
+function initialFilters(statusParam: string | null): CertificateFiltersValue {
+  const status: CertificateStatusFilter =
+    statusParam && (VALID_STATUSES as string[]).includes(statusParam)
+      ? (statusParam as CertificateStatusFilter)
+      : 'issued';
+  return {
+    status,
+    investorId: null,
+    issueDateFrom: null,
+    issueDateTo: null,
+    q: '',
+  };
+}
 
 export function CertificatesPage() {
-  const [filters, setFiltersInternal] = useState<CertificateFiltersValue>(INITIAL_FILTERS);
+  const searchParams = useSearchParams();
+  const [filters, setFiltersInternal] = useState<CertificateFiltersValue>(() =>
+    initialFilters(searchParams.get('status')),
+  );
   const [page, setPage] = useState(0);
 
   function setFilters(next: CertificateFiltersValue) {
