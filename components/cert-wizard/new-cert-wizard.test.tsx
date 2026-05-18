@@ -91,7 +91,7 @@ describe('<NewCertWizard />', () => {
     );
   });
 
-  it('full flow: select investor → Recalcular → Crear borrador → Confirmar emisión closes modal', async () => {
+  it('full flow: select investor → Recalcular → Crear borrador → Confirmar borrador closes modal', async () => {
     mockSimulate.mockResolvedValueOnce(mockSim);
     mockIssue.mockResolvedValueOnce({ id: 'c-1', code: 'C0001A' });
     const onClose = vi.fn();
@@ -106,8 +106,10 @@ describe('<NewCertWizard />', () => {
     await waitFor(() => expect(mockSimulate).toHaveBeenCalled());
     await waitFor(() => expect(screen.getByText(/las 3 reglas se cumplen/i)).toBeInTheDocument());
     fireEvent.click(screen.getByRole('button', { name: /crear borrador/i }));
-    await waitFor(() => expect(screen.getByText(/irreversible/i)).toBeInTheDocument());
-    fireEvent.click(screen.getByRole('button', { name: /confirmar emisi[oó]n/i }));
+    await waitFor(() =>
+      expect(screen.getByText(/pendiente de aprobaci[oó]n por un admin/i)).toBeInTheDocument(),
+    );
+    fireEvent.click(screen.getByRole('button', { name: /confirmar borrador/i }));
     await waitFor(() => expect(mockIssue).toHaveBeenCalled());
     await waitFor(() => expect(onClose).toHaveBeenCalled());
   });

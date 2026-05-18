@@ -21,6 +21,6 @@ describe('<StepIndicator />', () => {
     render(<StepIndicator current={1} />);
     expect(screen.getByText('Datos del inversor')).toBeInTheDocument();
     expect(screen.getByText('Simulación del pool')).toBeInTheDocument();
-    expect(screen.getByText('Emisión y firma')).toBeInTheDocument();
+    expect(screen.getByText('Confirmación del borrador')).toBeInTheDocument();
   });
 });

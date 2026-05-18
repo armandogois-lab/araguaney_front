@@ -9,10 +9,16 @@ describe('<OrderStatusPill />', () => {
     expect(container.querySelector('span')?.className).toContain('bg-green-bg');
   });
 
-  it('shows "Asignada" with warn tone for assigned', () => {
+  it('shows "Reservada" with warn tone for reserved', () => {
+    const { container, getByText } = render(<OrderStatusPill status="reserved" />);
+    expect(getByText('Reservada')).toBeInTheDocument();
+    expect(container.querySelector('span')?.className).toContain('bg-warn-bg');
+  });
+
+  it('shows "Asignada" with info tone for assigned', () => {
     const { container, getByText } = render(<OrderStatusPill status="assigned" />);
     expect(getByText('Asignada')).toBeInTheDocument();
-    expect(container.querySelector('span')?.className).toContain('bg-warn-bg');
+    expect(container.querySelector('span')?.className).toContain('bg-info-bg');
   });
 
   it('shows "Vencida" with neutral tone for matured', () => {

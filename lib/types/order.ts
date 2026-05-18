@@ -1,4 +1,4 @@
-export type OrderStatus = 'available' | 'assigned' | 'matured' | 'defaulted';
+export type OrderStatus = 'available' | 'reserved' | 'assigned' | 'matured' | 'defaulted';
 
 export interface OrderMerchantRef {
   id: string;

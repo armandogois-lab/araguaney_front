@@ -35,7 +35,7 @@ export function Step3Confirm({
       qc.invalidateQueries({ queryKey: ['orders'] });
       qc.invalidateQueries({ queryKey: ['orders-stats'] });
       qc.invalidateQueries({ queryKey: ['certs-this-week'] });
-      toast.success(`Certificado ${cert.certificate_code} emitido`);
+      toast.success('Borrador creado. Pendiente de aprobación por un admin.');
       onSuccess(cert);
       onConfirmEnd();
     },
@@ -74,7 +74,7 @@ export function Step3Confirm({
 
   return (
     <div className="flex flex-col gap-4 px-7 py-6">
-      <div className="text-[13px]">Vas a emitir un certificado con los siguientes términos:</div>
+      <div className="text-[13px]">Vas a crear un borrador con los siguientes términos:</div>
       <div className="grid grid-cols-2 gap-3">
         <Panel title="Inversor">
           <Row label="Razón social" value={simulation.investor.legal_name} mono={false} />
@@ -95,7 +95,8 @@ export function Step3Confirm({
         <Row label="Comercios distintos" value={String(simulation.total_distinct_merchants)} />
       </Panel>
       <div className="bg-warn-bg text-warn-text rounded-md px-3 py-2 text-[12px]">
-        ⚠️ Esta emisión es irreversible salvo cancelación posterior.
+        ⚠️ El borrador queda pendiente de aprobación por un admin. Las órdenes quedan reservadas
+        hasta que se apruebe o cancele.
       </div>
     </div>
   );
