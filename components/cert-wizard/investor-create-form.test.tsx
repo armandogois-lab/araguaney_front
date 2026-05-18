@@ -71,4 +71,24 @@ describe('<InvestorCreateForm />', () => {
     expect(screen.getByRole('radio', { name: /natural/i })).toBeChecked();
     expect(screen.getByRole('radio', { name: /jur[ií]dica/i })).not.toBeChecked();
   });
+
+  it('prefills RIF with J- by default (juridica)', () => {
+    renderWithQuery(<InvestorCreateForm onCreated={vi.fn()} />);
+    expect(screen.getByLabelText(/^rif/i)).toHaveValue('J-');
+  });
+
+  it('swaps RIF prefix to V- when switching to natural and back', () => {
+    renderWithQuery(<InvestorCreateForm onCreated={vi.fn()} />);
+    fireEvent.click(screen.getByRole('radio', { name: /natural/i }));
+    expect(screen.getByLabelText(/^rif/i)).toHaveValue('V-');
+    fireEvent.click(screen.getByRole('radio', { name: /jur[ií]dica/i }));
+    expect(screen.getByLabelText(/^rif/i)).toHaveValue('J-');
+  });
+
+  it('preserves the typed digits when swapping prefix', () => {
+    renderWithQuery(<InvestorCreateForm onCreated={vi.fn()} />);
+    fireEvent.change(screen.getByLabelText(/^rif/i), { target: { value: 'J-12345678-9' } });
+    fireEvent.click(screen.getByRole('radio', { name: /natural/i }));
+    expect(screen.getByLabelText(/^rif/i)).toHaveValue('V-12345678-9');
+  });
 });
