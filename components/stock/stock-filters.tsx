@@ -20,8 +20,9 @@ interface Props {
 }
 
 const STATUS_OPTIONS: Array<{ value: StockStatusFilter; label: string }> = [
-  { value: 'available', label: 'Disponibles' },
   { value: 'all', label: 'Todas' },
+  { value: 'available', label: 'Disponibles' },
+  { value: 'reserved', label: 'Reservadas' },
   { value: 'assigned', label: 'Asignadas' },
   { value: 'matured', label: 'Vencidas' },
 ];
