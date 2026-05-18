@@ -19,7 +19,13 @@ function m(over: Partial<MerchantSummary> = {}): MerchantSummary {
 describe('<MerchantsTable />', () => {
   it('renders rows with name, RIF, count localized, money formatted, last seen date', () => {
     render(
-      <MerchantsTable rows={[m()]} isLoading={false} isError={false} onRowClick={vi.fn()} onRetry={vi.fn()} />,
+      <MerchantsTable
+        rows={[m()]}
+        isLoading={false}
+        isError={false}
+        onRowClick={vi.fn()}
+        onRetry={vi.fn()}
+      />,
     );
     expect(screen.getByText('CENTRAL MADEIRENSE')).toBeInTheDocument();
     expect(screen.getByText('J-12345678-9')).toBeInTheDocument();
@@ -31,7 +37,13 @@ describe('<MerchantsTable />', () => {
   it('row click fires onRowClick with merchant id', () => {
     const onRowClick = vi.fn();
     render(
-      <MerchantsTable rows={[m()]} isLoading={false} isError={false} onRowClick={onRowClick} onRetry={vi.fn()} />,
+      <MerchantsTable
+        rows={[m()]}
+        isLoading={false}
+        isError={false}
+        onRowClick={onRowClick}
+        onRetry={vi.fn()}
+      />,
     );
     fireEvent.click(screen.getByText('CENTRAL MADEIRENSE'));
     expect(onRowClick).toHaveBeenCalledWith('m-1');
@@ -39,7 +51,13 @@ describe('<MerchantsTable />', () => {
 
   it('shows loading state', () => {
     render(
-      <MerchantsTable rows={[]} isLoading={true} isError={false} onRowClick={vi.fn()} onRetry={vi.fn()} />,
+      <MerchantsTable
+        rows={[]}
+        isLoading={true}
+        isError={false}
+        onRowClick={vi.fn()}
+        onRetry={vi.fn()}
+      />,
     );
     expect(screen.getByText(/cargando comercios/i)).toBeInTheDocument();
   });
@@ -47,7 +65,13 @@ describe('<MerchantsTable />', () => {
   it('shows error state with retry button', () => {
     const onRetry = vi.fn();
     render(
-      <MerchantsTable rows={[]} isLoading={false} isError={true} onRowClick={vi.fn()} onRetry={onRetry} />,
+      <MerchantsTable
+        rows={[]}
+        isLoading={false}
+        isError={true}
+        onRowClick={vi.fn()}
+        onRetry={onRetry}
+      />,
     );
     expect(screen.getByText(/no se pudieron cargar/i)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /reintentar/i }));
@@ -56,7 +80,13 @@ describe('<MerchantsTable />', () => {
 
   it('shows empty state', () => {
     render(
-      <MerchantsTable rows={[]} isLoading={false} isError={false} onRowClick={vi.fn()} onRetry={vi.fn()} />,
+      <MerchantsTable
+        rows={[]}
+        isLoading={false}
+        isError={false}
+        onRowClick={vi.fn()}
+        onRetry={vi.fn()}
+      />,
     );
     expect(screen.getByText(/sin comercios que coincidan/i)).toBeInTheDocument();
   });

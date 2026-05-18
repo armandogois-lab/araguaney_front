@@ -37,9 +37,7 @@ export function MerchantsTable({ rows, isLoading, isError, onRowClick, onRetry }
   if (rows.length === 0) {
     return (
       <div className="bg-card border-border-subtle flex h-64 items-center justify-center rounded-xl border">
-        <div className="text-text-3 text-center text-sm italic">
-          Sin comercios que coincidan.
-        </div>
+        <div className="text-text-3 text-center text-sm italic">Sin comercios que coincidan.</div>
       </div>
     );
   }
