@@ -11,14 +11,30 @@ interface Props {
 
 type Kind = 'juridica' | 'natural';
 
+const PREFIX: Record<Kind, string> = { juridica: 'J-', natural: 'V-' };
+
+function swapPrefix(rif: string, nextKind: Kind): string {
+  const next = PREFIX[nextKind];
+  const other = nextKind === 'juridica' ? 'V-' : 'J-';
+  if (rif === '' || rif === other) return next;
+  if (rif.startsWith(other)) return next + rif.slice(other.length);
+  if (rif.startsWith(next)) return rif;
+  return next + rif;
+}
+
 export function InvestorCreateForm({ onCreated }: Props) {
-  const [legalName, setLegalName] = useState('');
-  const [rif, setRif] = useState('');
   const [kind, setKind] = useState<Kind>('juridica');
+  const [legalName, setLegalName] = useState('');
+  const [rif, setRif] = useState(PREFIX.juridica);
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
   const qc = useQueryClient();
+
+  function changeKind(nextKind: Kind) {
+    setKind(nextKind);
+    setRif((r) => swapPrefix(r, nextKind));
+  }
 
   const mut = useMutation({
     mutationFn: createInvestor,
@@ -31,7 +47,9 @@ export function InvestorCreateForm({ onCreated }: Props) {
     },
   });
 
-  const canSubmit = legalName.trim().length > 0 && rif.trim().length > 0 && !mut.isPending;
+  const rifPrefix = PREFIX[kind];
+  const rifBody = rif.startsWith(rifPrefix) ? rif.slice(rifPrefix.length) : rif;
+  const canSubmit = legalName.trim().length > 0 && rifBody.trim().length > 0 && !mut.isPending;
 
   function handleSubmit() {
     setError(null);
@@ -46,6 +64,29 @@ export function InvestorCreateForm({ onCreated }: Props) {
 
   return (
     <div className="flex flex-col gap-3">
+      <fieldset className="flex flex-col gap-1">
+        <legend className="text-text-3 text-[11px]">Tipo *</legend>
+        <div className="mt-1 flex items-center gap-4">
+          <label className="flex items-center gap-2 text-[12px]">
+            <input
+              type="radio"
+              name="kind"
+              checked={kind === 'juridica'}
+              onChange={() => changeKind('juridica')}
+            />
+            Jurídica
+          </label>
+          <label className="flex items-center gap-2 text-[12px]">
+            <input
+              type="radio"
+              name="kind"
+              checked={kind === 'natural'}
+              onChange={() => changeKind('natural')}
+            />
+            Natural
+          </label>
+        </div>
+      </fieldset>
       <Field label="Razón social *" id="legal_name">
         <input
           id="legal_name"
@@ -66,27 +107,6 @@ export function InvestorCreateForm({ onCreated }: Props) {
           className="border-border-subtle bg-card rounded-md border px-3 py-2 font-mono text-[12px]"
         />
       </Field>
-      <fieldset className="flex items-center gap-4">
-        <legend className="text-text-3 mb-1 text-[11px]">Tipo</legend>
-        <label className="flex items-center gap-2 text-[12px]">
-          <input
-            type="radio"
-            name="kind"
-            checked={kind === 'juridica'}
-            onChange={() => setKind('juridica')}
-          />
-          Jurídica
-        </label>
-        <label className="flex items-center gap-2 text-[12px]">
-          <input
-            type="radio"
-            name="kind"
-            checked={kind === 'natural'}
-            onChange={() => setKind('natural')}
-          />
-          Natural
-        </label>
-      </fieldset>
       <Field label="Email" id="email">
         <input
           id="email"
