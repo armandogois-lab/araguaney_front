@@ -11,10 +11,7 @@ interface Props {
 export function MerchantDetailHeader({ currentName, rif, firstSeenAt, lastSeenAt }: Props) {
   return (
     <div>
-      <PageHeader
-        breadcrumb={{ section: 'Datos', current: 'Comercios' }}
-        title={currentName}
-      />
+      <PageHeader breadcrumb={{ section: 'Datos', current: 'Comercios' }} title={currentName} />
       <div className="text-text-3 mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11.5px]">
         <span>
           RIF: <span className="font-mono">{rif}</span>

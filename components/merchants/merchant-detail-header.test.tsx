@@ -12,7 +12,9 @@ describe('<MerchantDetailHeader />', () => {
         lastSeenAt="2026-05-10T12:00:00Z"
       />,
     );
-    expect(screen.getByRole('heading', { level: 1, name: 'CENTRAL MADEIRENSE' })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'CENTRAL MADEIRENSE' }),
+    ).toBeInTheDocument();
     expect(screen.getByText('J-12345678-9')).toBeInTheDocument();
     expect(screen.getByText(/15\/01\/2026/)).toBeInTheDocument();
     expect(screen.getByText(/10\/05\/2026/)).toBeInTheDocument();
