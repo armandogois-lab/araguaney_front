@@ -20,7 +20,7 @@ describe('<WizardFooter />', () => {
     expect(screen.queryByRole('button', { name: /atr[aá]s/i })).not.toBeInTheDocument();
   });
 
-  it('Step 2 with simulation: shows Recalcular, Atrás, Cancelar, Emitir', () => {
+  it('Step 2 with simulation: shows Recalcular, Atrás, Cancelar, Crear borrador', () => {
     render(
       <WizardFooter
         step={2}
@@ -35,10 +35,11 @@ describe('<WizardFooter />', () => {
     );
     expect(screen.getByRole('button', { name: /recalcular/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /atr[aá]s/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /emitir/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /crear borrador/i })).toBeInTheDocument();
+    expect(screen.getByText(/se reservar[aá]n las [oó]rdenes/i)).toBeInTheDocument();
   });
 
-  it('Step 2 without simulation: Emitir is disabled', () => {
+  it('Step 2 without simulation: Crear borrador is disabled', () => {
     render(
       <WizardFooter
         step={2}
@@ -51,7 +52,7 @@ describe('<WizardFooter />', () => {
         onConfirm={vi.fn()}
       />,
     );
-    expect(screen.getByRole('button', { name: /emitir/i })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /crear borrador/i })).toBeDisabled();
   });
 
   it('Step 3: Confirmar emisión button calls onConfirm', () => {

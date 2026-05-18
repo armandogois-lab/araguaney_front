@@ -44,9 +44,15 @@ export function WizardFooter({
           <Btn onClick={onRecalculate} variant="ghost" disabled={busy}>
             Recalcular
           </Btn>
-          <Btn onClick={onConfirm} variant="primary" disabled={!hasSimulation || busy}>
-            Emitir certificado →
-          </Btn>
+          <div className="flex flex-col items-end gap-1">
+            <Btn onClick={onConfirm} variant="primary" disabled={!hasSimulation || busy}>
+              Crear borrador →
+            </Btn>
+            <p className="text-text-3 mt-2 text-[11px]">
+              Se reservarán las órdenes y el certificado quedará pendiente de aprobación por un
+              admin.
+            </p>
+          </div>
         </>
       )}
       {step === 3 && (
