@@ -84,9 +84,12 @@ export function CertificateDetailPage({ id }: Props) {
       </div>
       {cancelOpen && (
         <CancelCertModal
-          certId={data.id}
-          certCode={data.certificate_code}
-          orderCount={data.orders.length}
+          cert={{
+            id: data.id,
+            certificate_code: data.certificate_code,
+            status: data.status,
+            order_count: data.orders.length,
+          }}
           onClose={() => setCancelOpen(false)}
         />
       )}
