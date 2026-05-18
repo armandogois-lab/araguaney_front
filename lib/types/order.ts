@@ -49,6 +49,7 @@ export interface OrdersStatsBucket {
 export interface OrdersStats {
   by_status: {
     available: OrdersStatsBucket;
+    reserved: OrdersStatsBucket;
     assigned: OrdersStatsBucket;
     matured: OrdersStatsBucket;
     defaulted: OrdersStatsBucket;
