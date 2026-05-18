@@ -20,7 +20,7 @@ export function CancelCertModal({ certId, certCode, orderCount, onClose }: Props
   const qc = useQueryClient();
 
   const mut = useMutation({
-    mutationFn: (r: string) => cancelCertificate(certId, r),
+    mutationFn: (r: string) => cancelCertificate(certId, { reason: r }),
     onSuccess: (cert) => {
       qc.invalidateQueries({ queryKey: ['certificate', certId] });
       qc.invalidateQueries({ queryKey: ['certificates'] });

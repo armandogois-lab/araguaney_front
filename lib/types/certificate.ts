@@ -17,7 +17,7 @@ export interface CertificateIssuedBy {
 /** Wire shape from GET /api/certificates list rows AND POST /api/certificates/:id/cancel. */
 export interface CertificateSummary {
   id: string;
-  certificate_code: string;
+  certificate_code: string | null;
   certificate_type: CertificateType;
   status: CertificateStatus;
   investor: CertificateInvestorRef;
@@ -74,6 +74,10 @@ export interface CertificateDetail extends CertificateSummary {
   investor_returned: string;
   payload_hash: string;
   cancellation: Cancellation | null;
+  approved_by: { id: string; full_name: string } | null;
+  approved_at: string | null;
+  cancelled_at: string | null;
+  cancellation_reason: string | null;
   orders: CertificateOrder[];
   events: CertificateEvent[];
 }

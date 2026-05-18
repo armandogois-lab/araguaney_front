@@ -59,7 +59,9 @@ describe('<CancelCertModal />', () => {
     );
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Cliente solicitó baja' } });
     fireEvent.click(screen.getByRole('button', { name: /confirmar/i }));
-    await waitFor(() => expect(mockCancel).toHaveBeenCalledWith('c-1', 'Cliente solicitó baja'));
+    await waitFor(() =>
+      expect(mockCancel).toHaveBeenCalledWith('c-1', { reason: 'Cliente solicitó baja' }),
+    );
     await waitFor(() => expect(onClose).toHaveBeenCalled());
     expect(toastSuccess).toHaveBeenCalledWith(expect.stringContaining('C4572A'));
   });
