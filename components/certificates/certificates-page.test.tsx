@@ -16,8 +16,12 @@ vi.mock('@/lib/api/investors', () => ({
   listInvestors: (...a: unknown[]) => mockListInvestors(...a),
 }));
 
+const { mockSearchParams } = vi.hoisted(() => ({
+  mockSearchParams: new URLSearchParams(),
+}));
 vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn() }),
+  useSearchParams: () => mockSearchParams,
 }));
 
 describe('<CertificatesPage />', () => {
@@ -42,5 +46,20 @@ describe('<CertificatesPage />', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Todos' }));
     await waitFor(() => expect(mockListCerts).toHaveBeenCalledTimes(2));
     expect(mockListCerts.mock.calls[1][0].status).toBeUndefined();
+  });
+
+  it('reads ?status=draft from the URL as initial filter', async () => {
+    mockSearchParams.set('status', 'draft');
+    try {
+      renderWithQuery(<CertificatesPage />);
+      await waitFor(() => expect(mockListCerts).toHaveBeenCalledTimes(1));
+      expect(mockListCerts.mock.calls[0][0].status).toBe('draft');
+      expect(screen.getByRole('button', { name: 'Borradores' })).toHaveAttribute(
+        'data-active',
+        'true',
+      );
+    } finally {
+      mockSearchParams.delete('status');
+    }
   });
 });
