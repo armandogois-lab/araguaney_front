@@ -40,9 +40,7 @@ export function CancelCertModal({ cert, onClose }: Props) {
       qc.invalidateQueries({ queryKey: ['orders'] });
       qc.invalidateQueries({ queryKey: ['orders-stats'] });
       toast.success(
-        isDraft
-          ? 'Borrador cancelado'
-          : `Certificado ${cert.certificate_code} cancelado`,
+        isDraft ? 'Borrador cancelado' : `Certificado ${cert.certificate_code} cancelado`,
       );
       onClose();
     },

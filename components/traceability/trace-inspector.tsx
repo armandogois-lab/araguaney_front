@@ -32,7 +32,7 @@ export function TraceInspector({ order, cert, payloadHash, onClose }: Props) {
     },
     {
       label: 'CERTIFICADO',
-      title: cert.certificate_code,
+      title: cert.certificate_code ?? '—',
       sub: `Emitido ${fmtDate(cert.issue_date)} · ${cert.term_days}d @ ${fmtPct(cert.annual_rate)}`,
     },
     {

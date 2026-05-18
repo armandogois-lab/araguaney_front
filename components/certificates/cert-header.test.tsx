@@ -28,6 +28,10 @@ function mockCert(over: Partial<CertificateDetail> = {}): CertificateDetail {
     created_at: '2026-04-27T14:30:00Z',
     payload_hash: 'h',
     cancellation: null,
+    approved_by: null,
+    approved_at: null,
+    cancelled_at: null,
+    cancellation_reason: null,
     orders: [],
     events: [],
     ...over,
@@ -132,5 +136,53 @@ describe('<CertHeader />', () => {
     );
     const btn = screen.getByRole('button', { name: /generando/i });
     expect(btn).toBeDisabled();
+  });
+
+  it('shows "—" placeholder in breadcrumb and code badge when certificate_code is null (draft)', () => {
+    render(
+      <UserProvider user={operator}>
+        <CertHeader
+          cert={mockCert({ status: 'draft', certificate_code: null })}
+          onCancel={vi.fn()}
+        />
+      </UserProvider>,
+    );
+    // both the breadcrumb <b> and the code badge should show "—", not crash
+    const dashes = screen.getAllByText('—');
+    expect(dashes.length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows "expira en Xh Ym" sub-text when cert is draft', () => {
+    // created_at 1 hour ago → should show "expira en 23h Ym"
+    const oneHourAgo = new Date(Date.now() - 3600 * 1000).toISOString();
+    render(
+      <UserProvider user={operator}>
+        <CertHeader
+          cert={mockCert({
+            status: 'draft',
+            certificate_code: null,
+            created_at: oneHourAgo,
+          })}
+          onCancel={vi.fn()}
+        />
+      </UserProvider>,
+    );
+    expect(screen.getByText(/expira en \d+h \d+m/i)).toBeInTheDocument();
+  });
+
+  it('shows "Aprobado por X" when cert is issued and approved_by is set', () => {
+    render(
+      <UserProvider user={operator}>
+        <CertHeader
+          cert={mockCert({
+            status: 'issued',
+            approved_by: { id: 'admin-1', full_name: 'Ana Admin' },
+            approved_at: '2026-04-27T15:00:00Z',
+          })}
+          onCancel={vi.fn()}
+        />
+      </UserProvider>,
+    );
+    expect(screen.getByText(/aprobado por ana admin/i)).toBeInTheDocument();
   });
 });
