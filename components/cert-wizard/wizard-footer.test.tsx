@@ -39,7 +39,7 @@ describe('<WizardFooter />', () => {
     expect(screen.getByText(/se reservar[aá]n las [oó]rdenes/i)).toBeInTheDocument();
   });
 
-  it('Step 2 without simulation: Crear borrador is disabled', () => {
+  it('Step 2 without simulation: Crear borrador is hidden, Recalcular is primary', () => {
     render(
       <WizardFooter
         step={2}
@@ -52,7 +52,9 @@ describe('<WizardFooter />', () => {
         onConfirm={vi.fn()}
       />,
     );
-    expect(screen.getByRole('button', { name: /crear borrador/i })).toBeDisabled();
+    expect(screen.queryByRole('button', { name: /crear borrador/i })).toBeNull();
+    expect(screen.queryByText(/se reservar[aá]n las [oó]rdenes/i)).toBeNull();
+    expect(screen.getByRole('button', { name: /recalcular/i })).toBeInTheDocument();
   });
 
   it('Step 3: Confirmar emisión button calls onConfirm', () => {

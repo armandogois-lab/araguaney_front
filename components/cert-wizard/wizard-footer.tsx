@@ -41,18 +41,29 @@ export function WizardFooter({
           <Btn onClick={onBack} variant="ghost" disabled={busy}>
             ← Atrás
           </Btn>
-          <Btn onClick={onRecalculate} variant="ghost" disabled={busy}>
+          {/* Until a fresh simulation exists, Recalcular is the only primary
+              action — Crear borrador is hidden so the flow reads
+              left-to-right: cancelar / atrás / RECALCULAR. Once the user runs
+              Recalcular and a simulation lands, Recalcular becomes ghost and
+              Crear borrador appears as the next primary action. */}
+          <Btn
+            onClick={onRecalculate}
+            variant={hasSimulation ? 'ghost' : 'primary'}
+            disabled={busy}
+          >
             Recalcular
           </Btn>
-          <div className="flex flex-col items-end gap-1">
-            <Btn onClick={onConfirm} variant="primary" disabled={!hasSimulation || busy}>
-              Crear borrador →
-            </Btn>
-            <p className="text-text-3 mt-2 text-[11px]">
-              Se reservarán las órdenes y el certificado quedará pendiente de aprobación por un
-              admin.
-            </p>
-          </div>
+          {hasSimulation && (
+            <div className="flex flex-col items-end gap-1">
+              <Btn onClick={onConfirm} variant="primary" disabled={busy}>
+                Crear borrador →
+              </Btn>
+              <p className="text-text-3 mt-2 text-[11px]">
+                Se reservarán las órdenes y el certificado quedará pendiente de aprobación por un
+                admin.
+              </p>
+            </div>
+          )}
         </>
       )}
       {step === 3 && (
