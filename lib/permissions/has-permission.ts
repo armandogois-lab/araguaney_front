@@ -33,6 +33,7 @@ const ADMIN_PERMS = [
   'user.manage',
   'user.read',
   'user.update',
+  'certificate.approve',
 ] as const;
 
 const ROLE_PERMISSIONS: Record<Role, ReadonlySet<string>> = {

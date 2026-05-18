@@ -1,11 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithQuery } from '@/test/helpers/tanstack';
 import { AppShell } from './app-shell';
 import type { MeUser } from '@/lib/api/me';
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/cycle',
   redirect: vi.fn(),
+}));
+
+vi.mock('@/lib/api/certificates', () => ({
+  listCertificates: vi.fn().mockResolvedValue({ data: [], total: 0, limit: 1, offset: 0 }),
 }));
 
 const adminUser: MeUser = {
@@ -18,7 +23,7 @@ const adminUser: MeUser = {
 
 describe('<AppShell />', () => {
   it('renders sidebar + main with children for admin user', () => {
-    render(
+    renderWithQuery(
       <AppShell user={adminUser}>
         <div data-testid="page">Cycle page content</div>
       </AppShell>,
@@ -30,7 +35,7 @@ describe('<AppShell />', () => {
   });
 
   it('shows Sistema → Auditoría for operator (hides Trazabilidad and Usuarios)', () => {
-    render(
+    renderWithQuery(
       <AppShell user={{ ...adminUser, role: 'operator' }}>
         <div>X</div>
       </AppShell>,

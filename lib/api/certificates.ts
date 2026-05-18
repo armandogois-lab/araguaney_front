@@ -197,11 +197,25 @@ export async function getCertificateDetail(id: string): Promise<CertificateDetai
   }
 }
 
-export async function cancelCertificate(id: string, reason: string): Promise<CertificateDetail> {
+export async function cancelCertificate(
+  id: string,
+  body: { reason?: string } = {},
+): Promise<CertificateDetail> {
   try {
     return await apiFetch<CertificateDetail>(`/api/certificates/${id}/cancel`, {
       method: 'POST',
-      body: JSON.stringify({ reason }),
+      body: JSON.stringify(body),
+    });
+  } catch (err) {
+    rethrowWithMessage(err);
+  }
+}
+
+export async function approveDraft(id: string): Promise<CertificateDetail> {
+  try {
+    return await apiFetch<CertificateDetail>(`/api/certificates/${id}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({}),
     });
   } catch (err) {
     rethrowWithMessage(err);

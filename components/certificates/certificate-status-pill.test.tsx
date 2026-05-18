@@ -3,10 +3,10 @@ import { render, screen } from '@testing-library/react';
 import { CertificateStatusPill } from './certificate-status-pill';
 
 describe('<CertificateStatusPill />', () => {
-  it('shows "Borrador" with neutral tone for draft', () => {
+  it('renders "Borrador pendiente" for draft status', () => {
     const { container } = render(<CertificateStatusPill status="draft" />);
-    expect(screen.getByText('Borrador')).toBeInTheDocument();
-    expect(container.querySelector('span')?.className).toContain('bg-neutral-bg');
+    expect(screen.getByText(/borrador pendiente/i)).toBeInTheDocument();
+    expect(container.querySelector('span')?.className).toContain('bg-warn-bg');
   });
 
   it('shows "Activo" with success tone for issued', () => {

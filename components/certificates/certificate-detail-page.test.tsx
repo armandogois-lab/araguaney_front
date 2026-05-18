@@ -14,6 +14,7 @@ const { mockGet, mockGenerate, mockSaveAs } = vi.hoisted(() => ({
 vi.mock('@/lib/api/certificates', () => ({
   getCertificateDetail: (...a: unknown[]) => mockGet(...a),
   cancelCertificate: vi.fn(),
+  approveDraft: vi.fn(),
 }));
 
 vi.mock('sonner', () => ({
@@ -52,6 +53,10 @@ function mockCert(over: Partial<CertificateDetail> = {}): CertificateDetail {
     created_at: '2026-04-27T14:30:00Z',
     payload_hash: 'h',
     cancellation: null,
+    approved_by: null,
+    approved_at: null,
+    cancelled_at: null,
+    cancellation_reason: null,
     orders: [],
     events: [],
     ...over,
@@ -66,8 +71,30 @@ const operator = {
   is_active: true,
 };
 
-function wrap(ui: React.ReactElement) {
-  return renderWithQuery(<UserProvider user={operator}>{ui}</UserProvider>);
+const adminUser = {
+  id: 'admin-1',
+  email: 'admin@x.com',
+  full_name: 'Admin',
+  role: 'admin' as const,
+  is_active: true,
+};
+
+const auditorUser = {
+  id: 'aud-1',
+  email: 'aud@x.com',
+  full_name: 'Auditor',
+  role: 'auditor' as const,
+  is_active: true,
+};
+
+const draftCert: CertificateDetail = mockCert({
+  status: 'draft',
+  certificate_code: null,
+  issued_by: { id: 'op-1', email: 'op@x.com', full_name: 'Op Creator' },
+});
+
+function wrap(ui: React.ReactElement, user = operator) {
+  return renderWithQuery(<UserProvider user={user}>{ui}</UserProvider>);
 }
 
 describe('<CertificateDetailPage />', () => {
@@ -125,5 +152,51 @@ describe('<CertificateDetailPage />', () => {
     await waitFor(() => expect(mockSaveAs).toHaveBeenCalled());
     const filename = mockSaveAs.mock.calls[0][1] as string;
     expect(filename).toMatch(/Certificado_C4572A.*\.xlsx/);
+  });
+
+  it('admin viewing a draft sees Aprobar and Cancelar borrador buttons', async () => {
+    mockGet.mockResolvedValueOnce(draftCert);
+    wrap(<CertificateDetailPage id="c-1" />, adminUser);
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /aprobar/i })).toBeInTheDocument(),
+    );
+    expect(screen.getByRole('button', { name: /cancelar borrador/i })).toBeInTheDocument();
+  });
+
+  it('operator who is creator of a draft sees only Cancelar borrador', async () => {
+    // operator with id='op-1' matches draftCert.issued_by.id
+    const creatorOp = { ...operator, id: 'op-1' };
+    mockGet.mockResolvedValueOnce(draftCert);
+    wrap(<CertificateDetailPage id="c-1" />, creatorOp);
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /cancelar borrador/i })).toBeInTheDocument(),
+    );
+    expect(screen.queryByRole('button', { name: /^aprobar$/i })).toBeNull();
+  });
+
+  it('non-creator operator viewing a draft sees no action buttons', async () => {
+    // operator with id='op-2' does NOT match issued_by.id='op-1'
+    const otherOp = { ...operator, id: 'op-2' };
+    mockGet.mockResolvedValueOnce(draftCert);
+    wrap(<CertificateDetailPage id="c-1" />, otherOp);
+    await waitFor(() =>
+      expect(
+        screen.getByRole('heading', { level: 1, name: /inversora alpha/i }),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.queryByRole('button', { name: /^aprobar$/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /cancelar borrador/i })).toBeNull();
+  });
+
+  it('auditor viewing a draft sees no action buttons', async () => {
+    mockGet.mockResolvedValueOnce(draftCert);
+    wrap(<CertificateDetailPage id="c-1" />, auditorUser);
+    await waitFor(() =>
+      expect(
+        screen.getByRole('heading', { level: 1, name: /inversora alpha/i }),
+      ).toBeInTheDocument(),
+    );
+    expect(screen.queryByRole('button', { name: /^aprobar$/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /cancelar borrador/i })).toBeNull();
   });
 });

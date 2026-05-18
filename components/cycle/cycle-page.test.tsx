@@ -71,7 +71,13 @@ describe('<CyclePage />', () => {
   it('passes Mon-Fri to listCertificates and Monday to listAudit', async () => {
     wrap(<CyclePage />);
     await waitFor(() => expect(mockCerts).toHaveBeenCalled());
-    const certsArg = mockCerts.mock.calls[0][0];
+    // listCertificates is called both for the drafts count pill (status=draft)
+    // and for the weekly certs query (sort=issue_date_desc). Find the weekly one.
+    const weeklyCall = mockCerts.mock.calls.find(
+      ([arg]: [{ sort?: string }]) => arg.sort === 'issue_date_desc',
+    );
+    expect(weeklyCall).toBeDefined();
+    const certsArg = weeklyCall![0];
     expect(certsArg.issue_date_from).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(certsArg.issue_date_to).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(certsArg.sort).toBe('issue_date_desc');

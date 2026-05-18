@@ -6,6 +6,7 @@ import {
   listCertificates,
   getCertificateDetail,
   cancelCertificate,
+  approveDraft,
 } from './certificates';
 
 const mockApiFetch = vi.fn();
@@ -192,11 +193,24 @@ describe('cancelCertificate', () => {
       certificate_code: 'C0001A',
       status: 'cancelled',
     });
-    const result = await cancelCertificate('c-1', 'Cliente solicitó baja');
+    const result = await cancelCertificate('c-1', { reason: 'Cliente solicitó baja' });
     expect(result.status).toBe('cancelled');
     const [path, init] = mockApiFetch.mock.calls[0];
     expect(path).toBe('/api/certificates/c-1/cancel');
     expect(init.method).toBe('POST');
     expect(JSON.parse(init.body as string)).toEqual({ reason: 'Cliente solicitó baja' });
+  });
+});
+
+describe('approveDraft', () => {
+  beforeEach(() => vi.clearAllMocks());
+
+  it('POSTs /api/certificates/:id/approve with empty body', async () => {
+    mockApiFetch.mockResolvedValueOnce({ id: 'c-1', status: 'issued' });
+    await approveDraft('c-1');
+    expect(mockApiFetch).toHaveBeenCalledWith('/api/certificates/c-1/approve', {
+      method: 'POST',
+      body: JSON.stringify({}),
+    });
   });
 });

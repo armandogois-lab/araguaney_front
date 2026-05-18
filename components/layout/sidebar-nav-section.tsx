@@ -6,13 +6,15 @@ interface Props {
   section: NavSection;
   pathname: string;
   role: MeUser['role'];
+  /** Map from nav item key to badge count. */
+  badgeMap?: Record<string, number>;
 }
 
 function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(href + '/');
 }
 
-export function SidebarNavSection({ section, pathname, role }: Props) {
+export function SidebarNavSection({ section, pathname, role, badgeMap }: Props) {
   const items = section.items.filter(
     (item) => !item.allowedRoles || item.allowedRoles.includes(role),
   );
@@ -30,6 +32,7 @@ export function SidebarNavSection({ section, pathname, role }: Props) {
             label={item.label}
             href={item.href}
             active={isActive(pathname, item.href)}
+            badge={badgeMap?.[item.key]}
           />
         ))}
       </div>

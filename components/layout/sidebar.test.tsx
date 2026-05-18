@@ -1,11 +1,16 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import { renderWithQuery } from '@/test/helpers/tanstack';
 import { Sidebar } from './sidebar';
 import type { MeUser } from '@/lib/api/me';
 
 vi.mock('next/navigation', () => ({
   usePathname: () => '/cycle',
   redirect: vi.fn(),
+}));
+
+vi.mock('@/lib/api/certificates', () => ({
+  listCertificates: vi.fn().mockResolvedValue({ data: [], total: 0, limit: 1, offset: 0 }),
 }));
 
 const user: MeUser = {
@@ -18,7 +23,7 @@ const user: MeUser = {
 
 describe('<Sidebar />', () => {
   it('renders logo, nav, user, and a logout button', () => {
-    render(<Sidebar user={user} />);
+    renderWithQuery(<Sidebar user={user} />);
     expect(screen.getByText('Araguaney')).toBeInTheDocument();
     expect(screen.getByText('Panel del ciclo')).toBeInTheDocument();
     expect(screen.getByText('María Rodríguez')).toBeInTheDocument();
@@ -26,7 +31,7 @@ describe('<Sidebar />', () => {
   });
 
   it('logout button is inside a form posting to the logoutAction', () => {
-    const { container } = render(<Sidebar user={user} />);
+    const { container } = renderWithQuery(<Sidebar user={user} />);
     const form = container.querySelector('form');
     expect(form).not.toBeNull();
     const button = form?.querySelector('button[type="submit"]');

@@ -4,29 +4,44 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { cancelCertificate } from '@/lib/api/certificates';
+import type { CertificateStatus } from '@/lib/types/certificate';
 
-const MIN = 5;
 const MAX = 1000;
+const MIN = 5;
+
+interface CertProp {
+  id: string;
+  certificate_code: string | null;
+  status: CertificateStatus;
+  order_count: number;
+}
 
 interface Props {
-  certId: string;
-  certCode: string;
-  orderCount: number;
+  cert: CertProp;
   onClose: () => void;
 }
 
-export function CancelCertModal({ certId, certCode, orderCount, onClose }: Props) {
+export function CancelCertModal({ cert, onClose }: Props) {
   const [reason, setReason] = useState('');
   const qc = useQueryClient();
 
+  const isDraft = cert.status === 'draft';
+  const title = isDraft ? 'Cancelar borrador' : `Cancelar certificado ${cert.certificate_code}`;
+  const description = isDraft
+    ? `Las ${cert.order_count} órdenes reservadas vuelven al stock.`
+    : `Esta acción NO puede deshacerse. Las ${cert.order_count} órdenes vuelven a estado 'disponible'.`;
+  const reasonLabel = isDraft ? 'Razón (opcional)' : 'Motivo de la cancelación (requerido)';
+
   const mut = useMutation({
-    mutationFn: (r: string) => cancelCertificate(certId, r),
-    onSuccess: (cert) => {
-      qc.invalidateQueries({ queryKey: ['certificate', certId] });
+    mutationFn: (body: { reason?: string }) => cancelCertificate(cert.id, body),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['certificate', cert.id] });
       qc.invalidateQueries({ queryKey: ['certificates'] });
       qc.invalidateQueries({ queryKey: ['orders'] });
       qc.invalidateQueries({ queryKey: ['orders-stats'] });
-      toast.success(`Certificado ${cert.certificate_code} cancelado`);
+      toast.success(
+        isDraft ? 'Borrador cancelado' : `Certificado ${cert.certificate_code} cancelado`,
+      );
       onClose();
     },
     onError: (err) => {
@@ -35,7 +50,15 @@ export function CancelCertModal({ certId, certCode, orderCount, onClose }: Props
   });
 
   const trimmed = reason.trim();
-  const canSubmit = trimmed.length >= MIN && trimmed.length <= MAX && !mut.isPending;
+
+  function handleSubmit() {
+    const body = trimmed ? { reason: trimmed } : {};
+    mut.mutate(body);
+  }
+
+  const canSubmit = isDraft
+    ? !mut.isPending
+    : trimmed.length >= MIN && trimmed.length <= MAX && !mut.isPending;
 
   return (
     <div
@@ -48,9 +71,7 @@ export function CancelCertModal({ certId, certCode, orderCount, onClose }: Props
         className="bg-card mt-24 w-full max-w-[520px] overflow-hidden rounded-xl"
       >
         <header className="border-border-subtle flex items-start justify-between border-b px-6 py-4">
-          <h2 className="text-[16px] font-semibold tracking-[-0.2px]">
-            Cancelar certificado {certCode}
-          </h2>
+          <h2 className="text-[16px] font-semibold tracking-[-0.2px]">{title}</h2>
           <button
             type="button"
             onClick={onClose}
@@ -61,11 +82,10 @@ export function CancelCertModal({ certId, certCode, orderCount, onClose }: Props
         </header>
         <div className="flex flex-col gap-3 px-6 py-5">
           <div className="bg-warn-bg text-warn-text rounded-md px-3 py-2 text-[12px]">
-            ⚠️ Esta acción NO puede deshacerse. Las {orderCount} órdenes vuelven a estado
-            &apos;disponible&apos;.
+            ⚠️ {description}
           </div>
           <label className="flex flex-col gap-1">
-            <span className="text-text-3 text-[11px]">Motivo de la cancelación (requerido)</span>
+            <span className="text-text-3 text-[11px]">{reasonLabel}</span>
             <textarea
               value={reason}
               onChange={(e) => setReason(e.target.value)}
@@ -75,7 +95,7 @@ export function CancelCertModal({ certId, certCode, orderCount, onClose }: Props
             />
           </label>
           <div className="text-text-3 text-[10px] tabular-nums">
-            {trimmed.length} / {MAX} caracteres · mínimo {MIN}
+            {trimmed.length} / {MAX} caracteres{!isDraft && ` · mínimo ${MIN}`}
           </div>
         </div>
         <div className="border-border-subtle bg-card flex items-center justify-end gap-2 border-t px-6 py-4">
@@ -89,7 +109,7 @@ export function CancelCertModal({ certId, certCode, orderCount, onClose }: Props
           </button>
           <button
             type="button"
-            onClick={() => mut.mutate(trimmed)}
+            onClick={handleSubmit}
             disabled={!canSubmit}
             className="bg-foreground text-background rounded-md px-3 py-1.5 text-[12px] font-medium disabled:opacity-40"
           >
